@@ -1,0 +1,4 @@
+#!/bin/bash
+
+180687 | sudo -S netstat -ap | grep :4444
+
