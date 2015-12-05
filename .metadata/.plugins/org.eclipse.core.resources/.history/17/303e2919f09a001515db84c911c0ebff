@@ -81,8 +81,6 @@ data_t BytesToData(int *act,struct protocolo_t *msg)
 		{
 			de.det.title[i] = msg->MSG[i+*act];
 		}
-		de.det.title[de.det.lent]= '\0';
-
 		*act = *act + de.det.lent;
 		de.det.lena = msg->MSG[*act];
 		*act= *act +1;
@@ -91,8 +89,6 @@ data_t BytesToData(int *act,struct protocolo_t *msg)
 			de.det.aut[i] = msg->MSG[i+*act];
 		}
 
-		de.det.aut[de.det.lena]= '\0';
-
 		*act  = *act + de.det.lena;
 		de.det.lend = msg->MSG[*act];
 		*act= *act +1;
@@ -100,11 +96,8 @@ data_t BytesToData(int *act,struct protocolo_t *msg)
 		{
 			de.det.desc[i] = msg->MSG[i+*act];
 		}
-
-		de.det.desc[de.det.lend]= '\0';
-
-		*act  = *act + de.det.lend;
-
+		*act  = *act +  de.det.lend;
+		*act= *act +1;
 
 
 	return de;

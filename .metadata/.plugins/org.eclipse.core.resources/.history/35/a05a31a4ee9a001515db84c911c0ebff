@@ -102,8 +102,8 @@ void publicarContenido(struct protocolo_t *msg)
 		for(i=0; i <  data.det.lend;i++){
 			data.det.desc[i]=msg->MSG[i+act];
 		}
-		act += data.det.lend;
 
+		act++;
 
 		contentsArray[posContent].propietario=msg->ID_USER;
 		contentsArray[posContent].det=data.det;

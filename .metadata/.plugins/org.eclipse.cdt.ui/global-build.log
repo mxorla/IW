@@ -1,4 +1,7 @@
-16:59:16 **** Incremental Build of configuration Debug for project IWTP-Client ****
+17:33:02 **** Incremental Build of configuration Debug for project IWTP-Server ****
+make all 
+make: Nothing to be done for 'all'.
+17:35:00 **** Incremental Build of configuration Debug for project IWTP-Client ****
 make all 
 Building file: ../client.c
 Invoking: GCC C Compiler
@@ -22,18 +25,6 @@ In file included from ../client.c:2:0:
   unsigned char typeLen, msgLen, totalLen, idUserLength;
                 ^
 ../commonFunctions.h: In function ‘BytesToData’:
-../commonFunctions.h:79:3: warning: value computed is not used [-Wunused-value]
-   *act++;
-   ^
-../commonFunctions.h:86:3: warning: value computed is not used [-Wunused-value]
-   *act++;
-   ^
-../commonFunctions.h:94:3: warning: value computed is not used [-Wunused-value]
-   *act++;
-   ^
-../commonFunctions.h:100:3: warning: value computed is not used [-Wunused-value]
-   *act++;
-   ^
 ../commonFunctions.h:75:8: warning: unused variable ‘j’ [-Wunused-variable]
   int i,j;
         ^
@@ -63,10 +54,7 @@ Invoking: GCC C Linker
 gcc  -o "IWTP-Client"  ./client.o   -lpthread
 Finished building target: IWTP-Client
  
-16:59:21 **** Incremental Build of configuration Debug for project IWTP-Client ****
-make all 
-make: Nothing to be done for 'all'.
-17:02:38 **** Incremental Build of configuration Debug for project IWTP-Client ****
+17:37:03 **** Incremental Build of configuration Debug for project IWTP-Client ****
 make all 
 Building file: ../client.c
 Invoking: GCC C Compiler

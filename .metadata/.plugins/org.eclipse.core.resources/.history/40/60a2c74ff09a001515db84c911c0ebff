@@ -103,8 +103,8 @@ data_t BytesToData(int *act,struct protocolo_t *msg)
 
 		de.det.desc[de.det.lend]= '\0';
 
-		*act  = *act + de.det.lend;
-
+		*act  = *act +  de.det.lend;
+		*act= *act +1;
 
 
 	return de;

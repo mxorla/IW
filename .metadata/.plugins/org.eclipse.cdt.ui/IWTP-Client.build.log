@@ -1,4 +1,4 @@
-17:02:38 **** Incremental Build of configuration Debug for project IWTP-Client ****
+17:37:03 **** Incremental Build of configuration Debug for project IWTP-Client ****
 make all 
 Building file: ../client.c
 Invoking: GCC C Compiler
@@ -52,5 +52,5 @@ gcc  -o "IWTP-Client"  ./client.o   -lpthread
 Finished building target: IWTP-Client
  
 
-17:02:39 Build Finished (took 237ms)
+17:37:03 Build Finished (took 339ms)
 
