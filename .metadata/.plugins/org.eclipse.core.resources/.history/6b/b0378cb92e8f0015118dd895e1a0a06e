@@ -1,0 +1,41 @@
+//LIBRARIES INCLUDES
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+
+//CONSTANTS DEFINITIONS
+#define P_SIZE 				sizeof(struct protocolo_t)
+#define MSG_LEN				200
+#define MAX_CONNECTIONS				10
+
+//STRUCTURE DEFINITIONS
+struct protocolo_t {
+	unsigned char LEN;
+	uint16_t ID_USER;
+	char TYPE; 	
+	char MSG[MSG_LEN];  			//valor maximo 200 bytes
+};
+
+typedef struct {
+	uint16_t idUsuario;
+	int socketNumber;
+}users_t;
+
+typedef struct {
+	char path[255];
+	char Bytes[255];
+}content_t;
+
+//VARs
+users_t usersArray[MAX_CONNECTIONS];
+content_t contentsArray[20];
+int currentPosition=0;
+
+//FUNCTIONS PROTOTYPES
+int readMsg(int sd, struct protocolo_t *msg);
+int writeMsg(int sd, struct protocolo_t *msg);

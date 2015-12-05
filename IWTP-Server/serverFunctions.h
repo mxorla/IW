@@ -75,35 +75,39 @@ int getPosUserArray()
 
 void publicarContenido(struct protocolo_t *msg)
 {
-	int i,act, posContent=0;
+	int i, j,act, posContent=0;
 	data_t data;
-	posContent = getPosContentArray();
-
 	data.count = msg->MSG[0];
-	data.det.lent = msg->MSG[1];
-	act =2;
-	for(i=0; i <  data.det.lent;i++){
-		data.det.title[i]=msg->MSG[i+act];
+	act = 1;
+	for(j=0; j <  data.count ;j++){
+		posContent = getPosContentArray();
+
+
+		data.det.lent = msg->MSG[act];
+		act++;
+		for(i=0; i <  data.det.lent;i++){
+			data.det.title[i]=msg->MSG[i+act];
+		}
+		act += data.det.lent;
+		data.det.lena=msg->MSG[act];
+		act++;
+
+		for(i=0; i <  data.det.lena;i++){
+			data.det.aut[i]=msg->MSG[i+act];
+		}
+		act += data.det.lena;
+		data.det.lend=msg->MSG[act];
+		act++;
+
+		for(i=0; i <  data.det.lend;i++){
+			data.det.desc[i]=msg->MSG[i+act];
+		}
+
+		act++;
+
+		contentsArray[posContent].propietario=msg->ID_USER;
+		contentsArray[posContent].det=data.det;
 	}
-	act += data.det.lent;
-	data.det.lena=msg->MSG[act];
-	act++;
-
-	for(i=0; i <  data.det.lena;i++){
-		data.det.aut[i]=msg->MSG[i+act];
-	}
-	act += data.det.lena;
-	data.det.lend=msg->MSG[act];
-	act++;
-
-	for(i=0; i <  data.det.lend;i++){
-		data.det.desc[i]=msg->MSG[i+act];
-	}
-
-
-
-	contentsArray[posContent].propietario=msg->ID_USER;
-	contentsArray[posContent].det=data.det;
 }
 
 int getPosContentArray()

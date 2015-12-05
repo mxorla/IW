@@ -1,0 +1,83 @@
+#include "commonDefs.h"
+#include "commonFunctions.h"
+#include "serverFunctions.h"
+#include <stdio.h>
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+int main (void) {
+    int n, sd, sdc, lon, nro;
+    char buffer[P_SIZE];
+    struct sockaddr_in servidor;
+    struct sockaddr_in cliente;
+    struct protocolo_t *msg;
+	fd_set copia, conjunto;
+	
+    printf("Servidor\r\n");
+
+    servidor.sin_family = AF_INET;
+    servidor.sin_port = htons(4444);
+    servidor.sin_addr.s_addr = INADDR_ANY;
+
+    sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (bind(sd, (struct sockaddr *) &servidor, sizeof(servidor)) < 0) {
+		perror("Error en bind");
+		exit(-1);
+    }
+
+    listen(sd, 5);
+
+	FD_ZERO(&conjunto);
+	FD_SET(sd, &conjunto);
+
+    while (1) {
+		copia = conjunto;
+		select(FD_SETSIZE, &copia, NULL, NULL, NULL);
+
+		if (FD_ISSET(sd , &copia)) {
+			lon = sizeof(cliente);
+			sdc = accept (sd, (struct sockaddr *) &cliente, &lon);
+			FD_SET(sdc, &conjunto);
+		}
+		
+		for (sdc = 1; sdc < FD_SETSIZE; sdc++) {
+			if (FD_ISSET(sdc, &copia) && (sdc != sd)) {	
+				msg = (struct protocolo_t *) buffer;				
+				if ((n = readMsg(sdc, msg)) > 0) {
+					 printf("Len: %u\n", msg->LEN);
+					 printf("IDUSER: %i\n", msg->ID_USER);
+					 printf("Type: %i\n", msg->TYPE);
+
+
+					 //Si recibe un mensaje de usuario lo reenvia (solo a los usuarios del grupo)
+					if (msg->LEN != 0) {
+						for (nro=0; nro < msg->MSG[nro]!='\0'; nro++) {
+							printf("%c",msg->MSG[nro]);
+						}
+					}
+				}
+				//Se cerr� el socket
+				else {
+					//Cierra el socket cerrado en el otro extremo para que pueda ser reutilizado
+					close(sdc);
+					//Dado socket (sdc) obtiene numero
+					nro = buscarPosicionPorSocket(sdc);
+					//Lo marca como cerrado
+					usersArray[nro].socketNumber = -1;
+					//Borra descriptor del set
+					FD_CLR (sdc, &conjunto);
+					//Actualiza tabla en pantalla
+					mostrarUsuarios();
+				}
+			}
+		}
+    }
+	FD_CLR (sdc, &conjunto); //Borra descriptor del set
+	for (nro=0; nro < 8; nro++) {
+		close(nro+4);
+	}
+    close(sd);
+    return 0;
+}

@@ -1,0 +1,121 @@
+16:59:16 **** Incremental Build of configuration Debug for project IWTP-Client ****
+make all 
+Building file: ../client.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"client.d" -MT"client.d" -o "client.o" "../client.c"
+In file included from ../client.c:2:0:
+../commonFunctions.h: In function ‘readMsg’:
+../commonFunctions.h:9:9: warning: unused variable ‘counter’ [-Wunused-variable]
+  int j, counter=0, bytes=1, buffered=0; 
+         ^
+../commonFunctions.h:6:52: warning: unused variable ‘msgPos’ [-Wunused-variable]
+  unsigned char totalLen, pos=0, userPos, groupPos, msgPos;
+                                                    ^
+../commonFunctions.h:6:42: warning: unused variable ‘groupPos’ [-Wunused-variable]
+  unsigned char totalLen, pos=0, userPos, groupPos, msgPos;
+                                          ^
+../commonFunctions.h:6:33: warning: unused variable ‘userPos’ [-Wunused-variable]
+  unsigned char totalLen, pos=0, userPos, groupPos, msgPos;
+                                 ^
+../commonFunctions.h: In function ‘writeMsg’:
+../commonFunctions.h:50:16: warning: unused variable ‘typeLen’ [-Wunused-variable]
+  unsigned char typeLen, msgLen, totalLen, idUserLength;
+                ^
+../commonFunctions.h: In function ‘BytesToData’:
+../commonFunctions.h:79:3: warning: value computed is not used [-Wunused-value]
+   *act++;
+   ^
+../commonFunctions.h:86:3: warning: value computed is not used [-Wunused-value]
+   *act++;
+   ^
+../commonFunctions.h:94:3: warning: value computed is not used [-Wunused-value]
+   *act++;
+   ^
+../commonFunctions.h:100:3: warning: value computed is not used [-Wunused-value]
+   *act++;
+   ^
+../commonFunctions.h:75:8: warning: unused variable ‘j’ [-Wunused-variable]
+  int i,j;
+        ^
+In file included from ../client.c:3:0:
+../clientFunctions.h: In function ‘publicarContenido’:
+../clientFunctions.h:31:8: warning: unused variable ‘dataMessage’ [-Wunused-variable]
+   char dataMessage[200];
+        ^
+../client.c: In function ‘checkConnections’:
+../client.c:21:6: warning: unused variable ‘nro’ [-Wunused-variable]
+  int nro;data_t de;
+      ^
+../client.c: In function ‘main’:
+../client.c:82:16: warning: too many arguments for format [-Wformat-extra-args]
+         printf("Ingresar la ip del servidor\n", argv[0]);
+                ^
+../client.c:91:4: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+    if (h = gethostbyname(argv[1])){
+    ^
+../client.c:78:17: warning: unused variable ‘t’ [-Wunused-variable]
+  struct termios t;
+                 ^
+Finished building: ../client.c
+ 
+Building target: IWTP-Client
+Invoking: GCC C Linker
+gcc  -o "IWTP-Client"  ./client.o   -lpthread
+Finished building target: IWTP-Client
+ 
+16:59:21 **** Incremental Build of configuration Debug for project IWTP-Client ****
+make all 
+make: Nothing to be done for 'all'.
+17:02:38 **** Incremental Build of configuration Debug for project IWTP-Client ****
+make all 
+Building file: ../client.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"client.d" -MT"client.d" -o "client.o" "../client.c"
+In file included from ../client.c:2:0:
+../commonFunctions.h: In function ‘readMsg’:
+../commonFunctions.h:9:9: warning: unused variable ‘counter’ [-Wunused-variable]
+  int j, counter=0, bytes=1, buffered=0; 
+         ^
+../commonFunctions.h:6:52: warning: unused variable ‘msgPos’ [-Wunused-variable]
+  unsigned char totalLen, pos=0, userPos, groupPos, msgPos;
+                                                    ^
+../commonFunctions.h:6:42: warning: unused variable ‘groupPos’ [-Wunused-variable]
+  unsigned char totalLen, pos=0, userPos, groupPos, msgPos;
+                                          ^
+../commonFunctions.h:6:33: warning: unused variable ‘userPos’ [-Wunused-variable]
+  unsigned char totalLen, pos=0, userPos, groupPos, msgPos;
+                                 ^
+../commonFunctions.h: In function ‘writeMsg’:
+../commonFunctions.h:50:16: warning: unused variable ‘typeLen’ [-Wunused-variable]
+  unsigned char typeLen, msgLen, totalLen, idUserLength;
+                ^
+../commonFunctions.h: In function ‘BytesToData’:
+../commonFunctions.h:75:8: warning: unused variable ‘j’ [-Wunused-variable]
+  int i,j;
+        ^
+In file included from ../client.c:3:0:
+../clientFunctions.h: In function ‘publicarContenido’:
+../clientFunctions.h:31:8: warning: unused variable ‘dataMessage’ [-Wunused-variable]
+   char dataMessage[200];
+        ^
+../client.c: In function ‘checkConnections’:
+../client.c:21:6: warning: unused variable ‘nro’ [-Wunused-variable]
+  int nro;data_t de;
+      ^
+../client.c: In function ‘main’:
+../client.c:82:16: warning: too many arguments for format [-Wformat-extra-args]
+         printf("Ingresar la ip del servidor\n", argv[0]);
+                ^
+../client.c:91:4: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+    if (h = gethostbyname(argv[1])){
+    ^
+../client.c:78:17: warning: unused variable ‘t’ [-Wunused-variable]
+  struct termios t;
+                 ^
+Finished building: ../client.c
+ 
+Building target: IWTP-Client
+Invoking: GCC C Linker
+gcc  -o "IWTP-Client"  ./client.o   -lpthread
+Finished building target: IWTP-Client
+ 

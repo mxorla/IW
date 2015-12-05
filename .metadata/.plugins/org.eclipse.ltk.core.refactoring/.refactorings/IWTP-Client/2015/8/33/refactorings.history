@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;IWTP-Client/clientFunctions&apos; to &apos;clientFunctions.h&apos;" description="Rename resource &apos;clientFunctions&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="clientFunctions" name="clientFunctions.h" stamp="1439590037669" updateReferences="true"/>
+</session>

@@ -1,0 +1,63 @@
+
+**** Build of configuration Debug for project TP ****
+
+make all 
+Building file: ../client.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"client.d" -MT"client.d" -o "client.o" "../client.c"
+../client.c: In function ‘main’:
+../client.c:61:5: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+     if (h = gethostbyname(argv[1])) {
+     ^
+../client.c:46:24: warning: unused variable ‘cliente’ [-Wunused-variable]
+     struct sockaddr_in cliente;
+                        ^
+../client.c:43:9: warning: unused variable ‘n’ [-Wunused-variable]
+     int n, lon, interval = 30000, msgPos=0;
+         ^
+Finished building: ../client.c
+ 
+Building file: ../server.c
+Invoking: GCC C Compiler
+gcc -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"server.d" -MT"server.d" -o "server.o" "../server.c"
+../server.c: In function ‘main’:
+../server.c:40:52: warning: pointer targets in passing argument 3 of ‘accept’ differ in signedness [-Wpointer-sign]
+    sdc = accept (sd, (struct sockaddr *) &cliente, &lon);
+                                                    ^
+In file included from ../commonDefs.h:6:0,
+                 from ../server.c:1:
+/usr/include/x86_64-linux-gnu/sys/socket.h:243:12: note: expected ‘socklen_t * __restrict__’ but argument is of type ‘int *’
+ extern int accept (int __fd, __SOCKADDR_ARG __addr,
+            ^
+../server.c:65:6: warning: implicit declaration of function ‘close’ [-Wimplicit-function-declaration]
+      close(sdc);
+      ^
+../server.c:9:31: warning: unused variable ‘i’ [-Wunused-variable]
+     int n, sd, sdc, pid, lon, i, nro;
+                               ^
+../server.c:9:21: warning: unused variable ‘pid’ [-Wunused-variable]
+     int n, sd, sdc, pid, lon, i, nro;
+                     ^
+Finished building: ../server.c
+ 
+Building target: TP
+Invoking: GCC C Linker
+gcc  -o "TP"  ./client.o ./server.o   
+./server.o:(.bss+0x0): multiple definition of `actualPos'
+./client.o:(.bss+0x0): first defined here
+./server.o: In function `leerMensaje':
+/home/mxorla/workspace/TP/Debug/../commonFunctions.h:5: multiple definition of `leerMensaje'
+./client.o:/home/mxorla/workspace/TP/Debug/../commonFunctions.h:5: first defined here
+./server.o: In function `escribirMensaje':
+/home/mxorla/workspace/TP/Debug/../commonFunctions.h:65: multiple definition of `escribirMensaje'
+./client.o:/home/mxorla/workspace/TP/Debug/../commonFunctions.h:65: first defined here
+./server.o: In function `main':
+/home/mxorla/workspace/TP/Debug/../server.c:8: multiple definition of `main'
+./client.o:/home/mxorla/workspace/TP/Debug/../client.c:42: first defined here
+makefile:29: recipe for target 'TP' failed
+./client.o: In function `main':
+/home/mxorla/workspace/TP/Debug/../client.c:105: undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+make: *** [TP] Error 1
+
+**** Build Finished ****

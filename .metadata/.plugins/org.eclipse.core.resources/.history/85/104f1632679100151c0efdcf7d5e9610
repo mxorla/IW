@@ -1,0 +1,171 @@
+
+//FUNCTIONS PROTOTYPES
+void conectar(int sd,struct protocolo_t *msg);
+void publicarContenido(int sd, struct protocolo_t *msg);
+void consultarContenido(int sd, struct protocolo_t *msg);
+void consultarInformacionContenido(int sd, struct protocolo_t *msg);
+void desconectar(int sd, struct protocolo_t *msg);
+void bloquearContenido(int sd, struct protocolo_t *msg);
+void desbloquearContenido(int sd, struct protocolo_t *msg);
+
+
+//------------------------------------------------------------------------------
+// Conecta al servidor
+//------------------------------------------------------------------------------
+void conectar(int sd, struct protocolo_t *msg) {
+
+	msg->LEN=4;
+	msg->ID_USER= (uint16_t) ~((unsigned int) sd);
+	msg->TYPE=1;
+	msg->MSG[0]='\0';
+
+	writeMsg(sd, msg);
+}
+
+void publicarContenido(int sd, struct protocolo_t *msg)
+{
+		msg->LEN=14;
+		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->TYPE=2;
+		data_t data;
+		char dataMessage[200];
+		int i, act;
+		char opt = 's';
+        act = 0;
+		while (act < 191 && (opt == 's' || &opt =='S')){
+		// hacer un loop para cargar varios contenidos por ahora va 1
+				printf("Ingrese Titulo\r\n");
+				scanf("%s", data.det.title);
+				data.det.lent =  strlen(data.det.title);
+
+				printf("Ingrese Autor\r\n");
+				scanf("%s", data.det.aut);
+				data.det.lena =  strlen(data.det.aut);
+
+				printf("Ingrese Descripcion\r\n");
+				scanf("%s", data.det.desc);
+				data.det.lend =  strlen(data.det.desc);
+
+				data.count = (uint8_t) 1;
+
+				DataToBytes(act, data,msg);
+
+				act += data.det.lent + data.det.lena +data.det.lend +3;
+/*
+				dataMessage[0] = data.count;
+				dataMessage[1] = data.det.lent;
+				act=2;
+
+				for(i=0; i <  data.det.lent;i++){
+					dataMessage[i+act]=data.det.title[i];
+				}
+				act += data.det.lent;
+				dataMessage[act]=data.det.lena;
+				act++;
+
+				for(i=0; i <  data.det.lena;i++){
+					dataMessage[i+act]=data.det.aut[i];
+				}
+				act += data.det.lena;
+				dataMessage[act]=data.det.lend;
+				act++;
+
+				for(i=0; i <  data.det.lend;i++){
+					dataMessage[i+act]=data.det.desc[i];
+				}
+				act += data.det.lend ;
+				dataMessage[act]='\0';
+
+				memcpy(msg->MSG, dataMessage, act);
+
+*/
+		}
+
+		writeMsg(sd, msg);
+
+}
+
+void consultarContenido(int sd, struct protocolo_t *msg)
+{
+	    msg->LEN=4;
+		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->TYPE=3;
+		msg->MSG[0]='\0';
+
+		writeMsg(sd, msg);
+}
+
+void consultarInformacionContenido(int sd, struct protocolo_t *msg)
+{
+	    char title[50];
+		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->TYPE=4;
+
+		printf("Ingrese Titulo que desea obtener info\r\n");
+							scanf("%s",title);
+
+		msg->LEN= 4 + strlen(title);
+		memcpy(msg->MSG, title, strlen(title));
+		msg->MSG[strlen(title)]='\0';
+
+		writeMsg(sd, msg);
+}
+
+void desconectar(int sd, struct protocolo_t *msg)
+{
+	    msg->LEN=4;
+		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->TYPE=5;
+
+
+		writeMsg(sd, msg);
+}
+
+void bloquearContenido(int sd, struct protocolo_t *msg)
+{
+	    msg->LEN=18;
+		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->TYPE=6;
+		msg->MSG[0]='I';
+		msg->MSG[1]='d';
+		msg->MSG[2]='.';
+		msg->MSG[3]=' ';
+		msg->MSG[4]='C';
+		msg->MSG[5]='o';
+		msg->MSG[6]='n';
+		msg->MSG[7]='t';
+		msg->MSG[8]='e';
+		msg->MSG[9]='n';
+		msg->MSG[10]='i';
+		msg->MSG[11]='d';
+		msg->MSG[12]='o';
+		msg->MSG[13]='\0';
+
+		writeMsg(sd, msg);
+}
+
+void desbloquearContenido(int sd, struct protocolo_t *msg)
+{
+	    msg->LEN=18;
+		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->TYPE=7;
+		msg->MSG[0]='I';
+		msg->MSG[1]='d';
+		msg->MSG[2]='.';
+		msg->MSG[3]=' ';
+		msg->MSG[4]='C';
+		msg->MSG[5]='o';
+		msg->MSG[6]='n';
+		msg->MSG[7]='t';
+		msg->MSG[8]='e';
+		msg->MSG[9]='n';
+		msg->MSG[10]='i';
+		msg->MSG[11]='d';
+		msg->MSG[12]='o';
+		msg->MSG[13]='\0';
+
+		writeMsg(sd, msg);
+}
+
+
+

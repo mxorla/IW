@@ -1,0 +1,6 @@
+16:20:42 **** Incremental Build of configuration Debug for project IWTP-Server ****
+make all 
+make: Nothing to be done for 'all'.
+
+16:20:42 Build Finished (took 71ms)
+

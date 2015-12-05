@@ -68,39 +68,37 @@ int writeMsg(int sd, struct protocolo_t *msg) {
 }
 
 
-data_t BytesToData(struct protocolo_t *msg)
+data_t BytesToData(int *act,struct protocolo_t *msg)
 {
 	data_t de;
-	de.count = msg->MSG[0];
+
+	int i,j;
 
 
-	int i,j, act;
-
-	act = 1;
-	for	(j=0; j< de.count;j++){
-		//loop
-		de.det.lent = msg->MSG[act];
-		act++;
+		de.det.lent = msg->MSG[*act];
+		*act= *act +1;
 		for(i=0;i<de.det.lent;i++)
 		{
-			de.det.title[i] = msg->MSG[i+act];
+			de.det.title[i] = msg->MSG[i+*act];
 		}
-		act += de.det.lent;
-		de.det.lena = msg->MSG[act];
-		act++;
+		*act = *act + de.det.lent;
+		de.det.lena = msg->MSG[*act];
+		*act= *act +1;
 		for(i=0;i<de.det.lena;i++)
 		{
-			de.det.aut[i] = msg->MSG[i+act];
+			de.det.aut[i] = msg->MSG[i+*act];
 		}
 
-		act += de.det.lena;
-		de.det.lend = msg->MSG[act];
-		act++;
+		*act  = *act + de.det.lena;
+		de.det.lend = msg->MSG[*act];
+		*act= *act +1;
 		for(i=0;i<de.det.lend;i++)
 		{
-			de.det.desc[i] = msg->MSG[i+act];
+			de.det.desc[i] = msg->MSG[i+*act];
 		}
-	}
+		*act  = *act +  de.det.lend;
+		*act= *act +1;
+
 
 	return de;
 }
@@ -111,8 +109,8 @@ void DataToBytes(int act, data_t data, struct protocolo_t *msg)
 	int i;
 	char dataMessage[200];
 	dataMessage[0] = data.count;
-	dataMessage[1] = data.det.lent;
-	act += 2;
+	dataMessage[act] = data.det.lent;
+	act += 1;
 
 	for(i=0; i <  data.det.lent;i++){
 		dataMessage[i+act]=data.det.title[i];

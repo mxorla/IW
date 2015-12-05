@@ -1,0 +1,140 @@
+#include "commonDefs.h"
+#include "commonFunctions.h"
+#include "serverFunctions.h"
+#include <stdio.h>
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+int main (void) {
+    int n, sd, sdc, lon, nro;
+    char buffer[P_SIZE];
+    struct sockaddr_in servidor;
+    struct sockaddr_in cliente;
+    struct protocolo_t *msg;
+	fd_set copia, conjunto;
+	
+    printf("Servidor\r\n");
+
+    servidor.sin_family = AF_INET;
+    servidor.sin_port = htons(4444);
+    servidor.sin_addr.s_addr = INADDR_ANY;
+
+    sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    if (bind(sd, (struct sockaddr *) &servidor, sizeof(servidor)) < 0) {
+		perror("Error en bind");
+		exit(-1);
+    }
+
+    const int       optVal = 0;
+    const socklen_t optLen = sizeof(optVal);
+
+    int rtn = setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+
+    listen(sd, 5);
+
+	FD_ZERO(&conjunto);
+	FD_SET(sd, &conjunto);
+
+    while (1) {
+		copia = conjunto;
+		select(FD_SETSIZE, &copia, NULL, NULL, NULL);
+
+		if (FD_ISSET(sd , &copia)) { // Recibe un cliente que se quiere conectar
+			lon = sizeof(cliente);
+			sdc = accept (sd, (struct sockaddr *) &cliente, &lon);
+			FD_SET(sdc, &conjunto);
+			agregarUsuario(sdc, sdc);
+			//Responde q esta conectado
+									msg->LEN=14;
+									msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
+									msg->TYPE=0;
+									msg->MSG[0]='C';
+									msg->MSG[1]='o';
+									msg->MSG[2]='n';
+									msg->MSG[3]='e';
+									msg->MSG[4]='c';
+									msg->MSG[5]='t';
+									msg->MSG[6]='a';
+									msg->MSG[7]='d';
+									msg->MSG[8]='o';
+									msg->MSG[9]='\0';
+
+									writeMsg(sdc, msg);
+		}
+		else{
+		
+		for (sdc = 1; sdc < FD_SETSIZE; sdc++) {
+			if (FD_ISSET(sdc, &copia) && (sdc != sd)) {	
+				msg = (struct protocolo_t *) buffer;				
+				if ((n = readMsg(sdc, msg)) > 0) {
+					 printf("Len: %u\n", msg->LEN);
+					 printf("IDUSER: %i\n", sdc);
+					 printf("Type: %i\n", msg->TYPE);
+					 switch (msg->TYPE) {
+					     			case 1:
+					     				{
+					     					//conectar(sd,msg);
+					     			  break;}
+					     			case 2:
+					     				{printf("Guardar el contenido");
+					     				publicarContenido(msg);
+					     			  break;}
+					     			case 3:
+					     				{printf("Enviar el contenido");
+					     				consultarContenido();
+					     					  break;}
+					     			case 4:
+					     				{printf("Enviar info del contenido");
+					     				//consultarInformacionContenido(sd, msg);
+					     					  break;}
+					     			case 5:
+					     				{
+					     									printf("Desconectar");
+					     									close(sdc);
+					     									//Dado socket (sdc) obtiene numero
+					     									nro = buscarPosicionPorSocket(sdc);
+					     									//Lo marca como cerrado
+					     									usersArray[nro].socketNumber = 0; // se le pone 0 porq al iniciarse el array arranca con 0 y se usa esa comparacion, antes era -1;
+					     									//Borra descriptor del set
+					     									FD_CLR (sdc, &conjunto);
+
+					     									printf("El usuario se desconecto\n");
+					     					  break;
+					     				}
+					     			default:
+					     				printf("0");
+					     			  break;
+					     			}
+
+					//if (msg->LEN != 0) {
+					//	printf("%s\n",msg->MSG);
+				//	}
+
+				}
+				//Se cerr� el socket
+				else {
+					//Cierra el socket cerrado en el otro extremo para que pueda ser reutilizado
+					close(sdc);
+					//Dado socket (sdc) obtiene numero
+					nro = buscarPosicionPorSocket(sdc);
+					//Lo marca como cerrado
+					usersArray[nro].socketNumber = 0; // se le pone 0 porq al iniciarse el array arranca con 0 y se usa esa comparacion, antes era -1;
+					//Borra descriptor del set
+					FD_CLR (sdc, &conjunto);
+
+					printf("El usuario se desconecto\n");
+
+				}
+			}
+		}
+		}
+    }
+	FD_CLR (sdc, &conjunto); //Borra descriptor del set
+	for (nro=0; nro < 8; nro++) {
+		close(nro+4);
+	}
+    close(sd);
+    return 0;
+}

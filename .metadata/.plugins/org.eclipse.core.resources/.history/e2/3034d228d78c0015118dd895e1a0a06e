@@ -1,0 +1,118 @@
+#include "commonDefs.h"
+#include "commonFunctions.h"
+#include "clientFunctions.h"
+#include <netdb.h>
+#include <pthread.h>
+#include <termios.h>
+#include <unistd.h>
+#include <ctype.h>
+
+
+int sd;
+struct protocolo_t *msg;
+char txBuf[P_SIZE];
+users_t user;
+
+//------------------------------------------------------------------------------
+// Se ejecuta cada 30 ms en un thread y chequea si hay mensajes.
+//------------------------------------------------------------------------------
+void *checkConnections(void *data) {
+	int interval = *(int *)data;
+	char primerMensaje=1;
+	
+	while(1) {	
+		if(readMsg(sd, msg) > 0) {
+
+			//verificar que tipo de mensaje es
+			if(primerMensaje == 1) {//si el msj es listar contenido imprimirlo
+				system("clear");
+				printf("****************************\r\n");
+				//printf("Contenido %s", msg->TYPE);
+
+				printf("****************************\r\n");
+				primerMensaje = 0;
+			}
+
+		}
+		usleep(interval);
+	}
+}
+
+//------------------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+int main(int argc, char *argv[])
+{
+
+    int lon, interval = 30000;
+
+    struct sockaddr_in servidor;
+    struct hostent *h;
+	struct termios t;
+	pthread_t thread;
+	
+    if (argc < 2) {
+        printf("Debe ejecutar %s (nombre de host)\n", argv[0]); 
+        exit (-1);
+    }
+
+    sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    servidor.sin_family = AF_INET;
+    servidor.sin_port = htons(4444);
+
+   if (h = gethostbyname(argv[1])){
+       memcpy(&servidor.sin_addr, h->h_addr, h->h_length);
+    }
+
+    lon = sizeof(servidor);
+    if (connect (sd, (struct sockaddr *) &servidor, lon ) < 0) {
+        perror ("Error en connect");
+        exit(-1);
+    }
+	
+	msg = (struct protocolo_t *) txBuf;
+	
+		
+
+	pthread_create(&thread, NULL, checkConnections, &interval);
+
+
+    while (1) {	
+    	int opcion;
+    			printf("Menu\n");
+    			printf("1 -		Conectar\n");
+    			printf("2 -		Publicar Contenido\n");
+    			printf("3 -		Consultar Contenido\n");
+    			printf("4 -		Consultar Informacion Contenido\n");
+    			printf("5 -		Desconectar\n");
+    			scanf("%d",&opcion); //Leyendo opcion
+
+    			switch (opcion) {
+    			case 1:
+    				conectar(sd,msg);
+    			  break;
+    			case 2:
+    				printf("2");
+    				publicarContenido(sd, msg);
+    			  break;
+    			case 3:
+    				printf("3");
+    					  break;
+    			case 4:
+    				printf("4");
+    					  break;
+    			case 5:
+    				printf("5");
+    					  break;
+    			default:
+    				printf("0");
+    			  break;
+    			}
+    			system("clear");
+    }
+
+	close(sd);
+}
+
+
