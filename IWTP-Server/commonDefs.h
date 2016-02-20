@@ -44,10 +44,22 @@ typedef struct {
 
 
 typedef struct {
-	uint8_t id_content;
-	uint16_t propietario;
-	det_t det;
+	uint16_t id;
+	char ip[15];
+	char puerto[4];
+}prop_t;
+
+typedef struct {
+uint8_t id_content;
+prop_t propietario;
+det_t det;
 }content_t;
+
+typedef struct {
+uint16_t id;
+char low;
+char hi;
+}parser_t;
 
 //VARs
 users_t usersArray[MAX_CONNECTIONS];
@@ -59,3 +71,6 @@ int readMsg(int sd, struct protocolo_t *msg);
 int writeMsg(int sd, struct protocolo_t *msg);
 data_t BytesToData(struct protocolo_t *msg);
 void DataToBytes(data_t data, struct protocolo_t *msg);
+parser_t intToChar(uint16_t source);
+parser_t charToInt(char* source);
+

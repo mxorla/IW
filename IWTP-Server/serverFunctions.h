@@ -105,7 +105,7 @@ void publicarContenido(struct protocolo_t *msg)
 		act += data.det.lend;
 
 		contentsArray[posContent].id_content=posContent + 1;
-		contentsArray[posContent].propietario=msg->ID_USER;
+		contentsArray[posContent].propietario.id = msg->ID_USER;
 		contentsArray[posContent].det=data.det;
 	}
 }
@@ -114,7 +114,7 @@ int getPosContentArray()
 {
 	int i, ret=-1;
 	for(i=0;i< MAX_CONTENTS;i++) {
-		if(contentsArray[i].propietario == 0) {
+		if(contentsArray[i].propietario.id == 0) {
 			ret = i;
 			break;
 		}
@@ -132,7 +132,7 @@ void consultarContenido(int sd,struct protocolo_t *msg)
 	msg->TYPE=1;
 	act = 1;
 	for(j=0;j< MAX_CONTENTS;j++) {
-		if(contentsArray[j].propietario == 0) {
+		if(contentsArray[j].propietario.id == 0) {
 			break;
 		}
 		cant++;
@@ -171,30 +171,60 @@ void consultarContenido(int sd,struct protocolo_t *msg)
 	writeMsg(sd, msg);
 }
 
-void consultarInformacionContenido(int sd,struct protocolo_t *msg)
+void consultarInformacionContenido(int sd, struct protocolo_t *msg)
 {
-	char title[50];
-	int j;
-/*
-	memcpy(title,msg->MSG, strlen(msg->MSG));
+	uint8_t id = msg->MSG[0];
 
-	for(j=0;j< MAX_CONTENTS;j++) {
-		int i;
-		for(i=0;i< strlen(title);i++) {
-			if(contentsArray[j].det.title[i] != title[i]) {
-				break;
+	int i,j, cant=0, act;
+	char dataMessage[200];
+	act = 1; //en 0 cantidad de contenidos
+	msg->LEN=4;
+	msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+	msg->TYPE=3; //TODO: ver tipo
+
+	for(j = 0; j < MAX_CONTENTS; j++) {
+		if(contentsArray[j].id_content == id)
+		{
+			//Longitud de ip
+			dataMessage[act] = (uint8_t) strlen(contentsArray[j].propietario.ip);
+			act++;
+
+			//Secuencia de ip
+			for(i = 0; i < strlen(contentsArray[j].propietario.ip); i++){
+				dataMessage[act] = contentsArray[j].propietario.ip[i];
+				act++;
 			}
+
+			//Longitud de puerto
+			dataMessage[act] = (uint8_t) strlen(contentsArray[j].propietario.puerto);
+			act++;
+
+			//Secuencia de puerto
+			for(i = 0; i < strlen(contentsArray[j].propietario.puerto); i++){
+				dataMessage[act] = contentsArray[j].propietario.puerto[i];
+				act++;
+			}
+
+			//Longitud del titulo
+			dataMessage[act] = contentsArray[j].det.lent;
+			act++;
+
+			//Secuencia del titulo
+			for(i = 0; i < contentsArray[j].det.lent; i++){
+				dataMessage[act] = contentsArray[j].det.title[i];
+				act++;
+			}
+
+			break;
 		}
 	}
 
-	msg->TYPE = 2;
+	dataMessage[0] = 1; // envia un solo contenido
+	dataMessage[act] = '\0';
 
-	memcpy(msg->MSG,contentsArray[j].propietario, strlen(contentsArray[j].propietario));
-
+	memcpy(msg->MSG, dataMessage, act);
 
 	writeMsg(sd, msg);
-*/
-
 }
 
 

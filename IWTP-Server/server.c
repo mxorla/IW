@@ -14,7 +14,8 @@ int main (void) {
     struct protocolo_t *msg;
 	fd_set copia, conjunto;
 	
-    printf("Servidor\r\n");
+    printf("Servidor corriendo\r\n");
+    printf("Esperando conexiones...\r\n");
 
     servidor.sin_family = AF_INET;
     servidor.sin_port = htons(4444);
@@ -48,8 +49,9 @@ int main (void) {
 			agregarUsuario(sdc, sdc);
 			//Responde q esta conectado
 									msg->LEN=14;
-									msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
-									msg->TYPE=0;
+									//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
+									msg->ID_USER=(uint8_t) sdc;
+									msg->TYPE=9;
 									msg->MSG[0]='C';
 									msg->MSG[1]='o';
 									msg->MSG[2]='n';
@@ -78,22 +80,22 @@ int main (void) {
 					     					//conectar(sd,msg);
 					     			  break;}
 					     			case 2:
-					     				{printf("Guardar el contenido");
+					     				{printf("Guardar el contenido\n");
 					     				publicarContenido(msg);
 					     			  break;}
 					     			case 3:
-					     				{printf("Enviar el contenido");
+					     				{printf("Enviar el contenido\n");
 					     				consultarContenido(sdc,msg);
 					     					  break;}
 					     			case 4:
 					     				{
-					     					printf("Enviar info del contenido");
+					     					printf("Enviar info del contenido\n");
 					     				consultarInformacionContenido(sdc, msg);
 					     					  break;
 					     				}
 					     			case 5:
 					     				{
-					     									printf("Desconectar");
+					     									printf("Desconectar\n");
 					     									close(sdc);
 					     									//Dado socket (sdc) obtiene numero
 					     									nro = buscarPosicionPorSocket(sdc);
@@ -115,7 +117,7 @@ int main (void) {
 				//	}
 
 				}
-				//Se cerr� el socket
+				//Se cerro el socket
 				else {
 					//Cierra el socket cerrado en el otro extremo para que pueda ser reutilizado
 					close(sdc);

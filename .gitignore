@@ -1,3 +1,5 @@
 *.zip
 *.rar
 .metadata/
+IWTP-Client/Debug/
+IWTP-Server/Debug/
