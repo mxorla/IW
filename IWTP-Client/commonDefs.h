@@ -42,12 +42,17 @@ typedef struct {
 }data_t;
 
 
+typedef struct {
+char ip[15];
+char puerto[4];
+}prop_t;
 
 typedef struct {
-	uint8_t id_content;
-	uint16_t propietario;
-	det_t det;
+uint8_t id_content;
+prop_t propietario;
+det_t det;
 }content_t;
+
 
 //VARs
 users_t usersArray[MAX_CONNECTIONS];

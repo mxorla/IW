@@ -115,7 +115,7 @@ int main (void) {
 				//	}
 
 				}
-				//Se cerr� el socket
+				//Se cerro el socket
 				else {
 					//Cierra el socket cerrado en el otro extremo para que pueda ser reutilizado
 					close(sdc);
