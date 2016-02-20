@@ -1,5 +1,5 @@
 //FUNCTIONS PROTOTYPES
-void agregarUsuario(uint8_t idUsuario, int socket);
+void agregarUsuario(struct sockaddr_in client, int socket);
 int buscarGrupoUsuario(int aux);
 int buscarPosicionUsuario(int aux);
 int buscarPosicionPorSocket(int aux);
@@ -7,26 +7,24 @@ void publicarContenido(struct protocolo_t *msg);
 void consultarContenido(int sd,struct protocolo_t *msg);
 void consultarInformacionContenido(int sd,struct protocolo_t *msg);
 int getPosContentArray();
+users_t getUserById(uint8_t userId);
 
 
 //------------------------------------------------------------------------------
 // Si el usuario no esta en el array lo agrega.
 //------------------------------------------------------------------------------
-void agregarUsuario(uint8_t idUsuario, int socket) {
-	int pos=0, userPos=0;
+void agregarUsuario(struct sockaddr_in client, int socket) {
+	int userPos;
 
-	userPos = buscarPosicionUsuario(idUsuario);
+	userPos = buscarPosicionUsuario(socket);
 	//Si el usuario aun no fue agregado lo agrega
 	if(userPos == -1) {
-		pos = getPosUserArray();
-		usersArray[pos].socketNumber = socket; //agregarlo en la ultima pos disponible
-		usersArray[pos].idUsuario = idUsuario;
+		userPos = getPosUserArray();
+		usersArray[userPos].idUsuario = socket;
 	}
-	//Si ya existe es una reconexion
-	else {
-		usersArray[userPos].socketNumber = socket;	//Solo actualiza el socket
-	}
-
+	usersArray[userPos].socketNumber = socket;	//Solo actualiza el socket
+	strcpy(usersArray[userPos].address.ip, inet_ntoa(client.sin_addr));
+	usersArray[userPos].address.puerto = ntohs(client.sin_port);
 }
 
 
@@ -73,6 +71,19 @@ int getPosUserArray()
 	return ret;
 }
 
+users_t getUserById(uint8_t userId)
+{
+	int i;
+	users_t user;
+	user.idUsuario = -1;
+	for(i=0;i< MAX_CONNECTIONS;i++) {
+		if(usersArray[i].idUsuario == userId) {
+			return usersArray[i];
+		}
+	}
+	return user;
+}
+
 void publicarContenido(struct protocolo_t *msg)
 {
 	int i, j,act, posContent=0;
@@ -105,8 +116,6 @@ void publicarContenido(struct protocolo_t *msg)
 
 		contentsArray[posContent].id_content=posContent + 1;
 		contentsArray[posContent].propietario.id = msg->ID_USER;
-		strcpy(contentsArray[posContent].propietario.ip, "999.999.9.9");
-		strcpy(contentsArray[posContent].propietario.puerto, "5959");
 		contentsArray[posContent].det=data.det;
 	}
 }
@@ -186,25 +195,23 @@ void consultarInformacionContenido(int sd, struct protocolo_t *msg)
 	for(j = 0; j < MAX_CONTENTS; j++) {
 		if(contentsArray[j].id_content == id)
 		{
+			users_t user = getUserById(contentsArray[j].propietario.id);
 			//Longitud de ip
-			dataMessage[act] = strlen(contentsArray[j].propietario.ip);
+			dataMessage[act] = strlen(user.address.ip);
 			act++;
 
 			//Secuencia de ip
-			for(i = 0; i < strlen(contentsArray[j].propietario.ip); i++){
-				dataMessage[act] = contentsArray[j].propietario.ip[i];
+			for(i = 0; i < strlen(user.address.ip); i++){
+				dataMessage[act] = user.address.ip[i];
 				act++;
 			}
 
-			//Longitud de puerto
-			dataMessage[act] =  sizeof(contentsArray[j].propietario.puerto);
+			uint8_t lowPort = user.address.puerto&0x00FF;
+			uint8_t highPort = user.address.puerto&0xFF00;
+			dataMessage[act] = lowPort;
 			act++;
-
-			//Secuencia de puerto
-			for(i = 0; i < sizeof(contentsArray[j].propietario.puerto); i++){
-				dataMessage[act] = contentsArray[j].propietario.puerto[i];
-				act++;
-			}
+			dataMessage[act] = highPort;
+			act++;
 
 			//Longitud del titulo
 			dataMessage[act] = contentsArray[j].det.lent;
