@@ -7,6 +7,8 @@ void consultarInformacionContenido(int sd, struct protocolo_t *msg);
 void desconectar(int sd, struct protocolo_t *msg);
 void bloquearContenido(int sd, struct protocolo_t *msg);
 void desbloquearContenido(int sd, struct protocolo_t *msg);
+void lookUpContent(int sd, struct protocolo_t *msg);
+int buscarPosicionPorSocket(int aux);
 
 
 //------------------------------------------------------------------------------
@@ -146,6 +148,45 @@ void desbloquearContenido(int sd, struct protocolo_t *msg)
 		msg->MSG[13]='\0';
 
 		writeMsg(sd, msg);
+}
+
+//------------------------------------------------------------------------------
+// Busca usuario por socket, si lo encuentra retorna posicion en el array, sino -1.
+//------------------------------------------------------------------------------
+int buscarPosicionPorSocket(int aux) {
+	int i, ret=-1;
+
+	for(i=0;i< MAX_CONNECTIONS;i++) {
+		if(usersArray[i].socketNumber == aux) {
+			ret = i;
+			break;
+		}
+	}
+	return ret;
+}
+
+void lookUpContent(int sd, struct protocolo_t *msg)
+{
+	/*
+	FILE * fp;
+	char * line = NULL;
+	size_t len = 0;
+	ssize_t read;
+
+	fp = fopen("/home/joaquin/tmp/test.txt", "r");
+	while ((read = getline(&line, &len, fp)) != -1) {
+		printf("Retrieved line of length %zu :\n", read);
+		printf("%s", line);
+	}
+
+	fclose(fp);
+	if (line) {
+		free(line);
+	}
+	*/
+	//TODO hacer streaming de archivo
+	writeMsg(sd, msg);
+
 }
 
 

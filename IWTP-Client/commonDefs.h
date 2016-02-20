@@ -41,8 +41,9 @@ typedef struct {
 	det_t det;
 }data_t;
 
+
 typedef struct {
-	uint16_t id;
+	uint8_t id;
 	char ip[15];
 	char puerto[4];
 }prop_t;
@@ -52,6 +53,7 @@ typedef struct {
 	prop_t propietario;
 	det_t det;
 }content_t;
+
 
 
 
