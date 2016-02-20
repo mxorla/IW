@@ -39,7 +39,7 @@ void *checkConnections(void *data) {
 				for	(j=0; j< cant;j++){
 					de = BytesToData(&act, msg);
 					printf("%d			%s           %s        ", de.id_content, de.det.title, de.det.aut);
-					printf("%s        %s", de.det.desc, "prop");
+					printf("%s        %s", de.det.desc, de.propietario.ip);
 					printf("\r\n");
 				}
 
@@ -47,10 +47,12 @@ void *checkConnections(void *data) {
 			}
 			else
 			{
-				if(msg->TYPE==2)
+				if(msg->TYPE==3)
 				{
 					if (msg->LEN != 0) {
-											printf("%s\n",msg->MSG);
+						int act = 1;
+						de = BytesToDataIp(&act, msg);
+						printf("%s        %s", de.det.title, de.propietario.ip);
 					}
 				}
 				else

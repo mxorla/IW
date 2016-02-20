@@ -3,10 +3,10 @@
 // la estructura msg. Retorna la cantidad de bytes leidos o 0 si se cerro el socket.
 //------------------------------------------------------------------------------
 int readMsg(int sd, struct protocolo_t *msg) {
-	unsigned char totalLen, pos = 0, userPos, groupPos, msgPos;
+	unsigned char totalLen, pos = 0, act=0;
 	char auxBuf[512];
 	char *ptr = 0;
-	int j, counter = 0, bytes = 1, buffered = 0;
+	int j, bytes = 1, buffered = 0;
 
 	for (j = 0; j < 512; j++)
 		auxBuf[j] = 0x00;
@@ -31,11 +31,13 @@ int readMsg(int sd, struct protocolo_t *msg) {
 	}
 
 	totalLen = auxBuf[0];
-	memcpy(&msg->LEN, &auxBuf[0], sizeof(char));
-	memcpy(&msg->ID_USER, &auxBuf[1], sizeof(msg->ID_USER));
-	memcpy(&msg->TYPE, &auxBuf[2], sizeof(char));
-
-	memcpy(&msg->MSG, &auxBuf[3], totalLen - 1);
+	memcpy(&msg->LEN, &auxBuf[act], sizeof(char));
+	act += sizeof(char);
+	memcpy(&msg->ID_USER, &auxBuf[act], sizeof(msg->ID_USER));
+	act+= sizeof(msg->ID_USER);
+	memcpy(&msg->TYPE, &auxBuf[act], sizeof(char));
+	act+= sizeof(char);
+	memcpy(&msg->MSG, &auxBuf[act], totalLen - 1);
 
 	return totalLen;
 }
@@ -46,20 +48,26 @@ int readMsg(int sd, struct protocolo_t *msg) {
 //------------------------------------------------------------------------------
 int writeMsg(int sd, struct protocolo_t *msg) {
 	char txBuf[P_SIZE];
-	unsigned char typeLen, msgLen, totalLen, idUserLength;
 
+	unsigned char typeLen, msgLen, totalLen, userIdLen;
+	totalLen=0;
 	//Calcula longitud del mensaje
 
 	msgLen = strlen(msg->MSG);
+	typeLen = sizeof(msg->TYPE);
+	userIdLen = sizeof(msg->TYPE);
 
-	totalLen = 4 + msgLen;
-	idUserLength = sizeof(msg->ID_USER);
 
 	//Arma el mensaje de longitud variable en el buffer de transmisi�n
-	txBuf[0] = totalLen;						//Escribe longitud en el buffer
-	memcpy(&txBuf[1], &msg->ID_USER, idUserLength);
-	memcpy(&txBuf[2], &msg->TYPE, sizeof(char));
-	memcpy(&txBuf[3], &msg->MSG, msgLen);
+
+	totalLen++;
+	memcpy(&txBuf[totalLen], &msg->ID_USER, sizeof(userIdLen));
+	totalLen+=userIdLen;
+	memcpy(&txBuf[totalLen], &msg->TYPE, typeLen);
+	totalLen+=typeLen;
+	memcpy(&txBuf[totalLen], &msg->MSG, msgLen);
+	totalLen+=msgLen;
+	txBuf[0] = totalLen;	//Escribe longitud en el buffer
 	txBuf[totalLen + 1] = '\0';									//Escribe fin
 
 	return send(sd, txBuf, totalLen, 0);
@@ -97,6 +105,33 @@ content_t BytesToData(int *act, struct protocolo_t *msg) {
 	content.det.desc[content.det.lend] = '\0';
 
 	*act = *act + content.det.lend;
+
+	return content;
+}
+
+content_t BytesToDataIp(int *act, struct protocolo_t *msg) {
+	content_t content;
+
+	int i, j;
+	uint8_t longIp = msg->MSG[*act];
+	*act = *act + 1;
+	for (i = 0; i < longIp; i++) {
+		content.propietario.ip[i] = msg->MSG[i + *act];
+		*act = *act + 1;
+		}
+	uint8_t longPort = msg->MSG[*act];
+	*act = *act + 1;
+		for (i = 0; i < longPort; i++) {
+			content.propietario.puerto[i] = msg->MSG[i + *act];
+			*act = *act + 1;
+			}
+
+	content.det.lent = msg->MSG[*act];
+	*act = *act + 1;
+	for (i = 0; i < content.det.lent; i++) {
+		content.det.title[i] = msg->MSG[i + *act];
+	}
+	content.det.title[content.det.lent] = '\0';
 
 	return content;
 }
