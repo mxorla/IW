@@ -23,7 +23,7 @@ struct protocolo_t {
 };
 
 typedef struct {
-	uint16_t idUsuario;
+	uint8_t idUsuario;
 	int socketNumber;
 }users_t;
 
@@ -66,6 +66,6 @@ int currentPosition=0;
 int readMsg(int sd, struct protocolo_t *msg);
 int writeMsg(int sd, struct protocolo_t *msg);
 content_t BytesToData(int *act, struct protocolo_t *msg);
-content_t BytesToDataIp(int *act, struct protocolo_t *msg);
+content_t BytesToDataIp(struct protocolo_t *msg);
 void DataToBytes(int act, data_t data, struct protocolo_t *msg);
 

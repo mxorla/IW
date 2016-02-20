@@ -22,46 +22,53 @@ void *checkConnections(void *data) {
 	while (1) {
 		if (readMsg(sd, msg) > 0) {
 
-			//verificar que tipo de mensaje es
-			printf("Len: %u\n", msg->LEN);
-			printf("IDUSER: %i\n", msg->ID_USER);
-			printf("Type: %i\n", msg->TYPE);
 			//nro=0;
 
-			if (msg->TYPE == 1) {
+			switch (msg->TYPE) {
+			case 1: {
 
 				int j, cant, act = 1;
 				printf(
-						"	ID     |     Titulo     |     Autor     |     Descripcion     |     Propietario\r\n");
+						"	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
 				printf(
 						"---------------------------------------------------------------------- \r\n");
 				cant = msg->MSG[0];
 				for (j = 0; j < cant; j++) {
 					de = BytesToData(&act, msg);
 
-					printf("%d			%s           %s        ", de.id_content, de.det.title, de.det.aut);
-					printf("%s        %s", de.det.desc, de.propietario.ip);
+					printf("%d			%s           %s        %s", de.id_content,
+							de.det.title, de.det.aut, de.det.desc);
 					printf("\r\n");
 				}
 
+				break;
+			}
+			case 2: {
+			}
+				break;
+			case 3: {
+				printf("Datos del contenido \r\n");
+				printf("	 Titulo     |        Propietario IP \r\n");
+				printf(
+						"---------------------------------------------------------------------- \r\n");
+
+				de = BytesToDataIp(msg);
+				printf("     %s                  %s", de.det.title, de.propietario.ip);
 
 			}
-			else
-			{
-				if(msg->TYPE==3)
-				{
-					if (msg->LEN != 0) {
-						int act = 1;
-						de = BytesToDataIp(&act, msg);
-						printf("%s        %s", de.det.title, de.propietario.ip);
 
-					}
-				} else {
-					if (msg->LEN != 0) {
-						printf("%s\n", msg->MSG);
-					}
+				break;
+			case 4: {
+			}
+				break;
+			default: {
+				printf("Ya esta conectado con el servidor, su id de usuario es %d  \r\n", msg->ID_USER);
+				if (msg->LEN != 0) {
+					printf("El Servidor Respondio --->   %s\n", msg->MSG);
 				}
 			}
+			}
+
 		}
 		usleep(interval);
 	}
@@ -73,10 +80,10 @@ void *checkConnections(void *data) {
 int main(int argc, char *argv[]) {
 
 	//Server Variables
-	int n, sd, sdc, nro;
+	int n, sdc, nro;
 	char buffer[P_SIZE];
 	struct sockaddr_in cliente;
-	struct protocolo_t *msg;
+
 	fd_set copia, conjunto;
 
 	int interval = 30;
@@ -93,7 +100,7 @@ int main(int argc, char *argv[]) {
 	childPID = fork();
 
 	if (childPID >= 0) {	// fork was successful
-		if (childPID == 0) {	// child process - client
+		if (childPID != 0) {	// Parent process- client
 			if (argc < 2) {
 				printf(
 						"Debe configurar el parametro correspondiente a la IP del servidor\n",
@@ -102,7 +109,6 @@ int main(int argc, char *argv[]) {
 			}
 
 			sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-
 			servidor.sin_family = AF_INET;
 			servidor.sin_port = htons(4444);
 
@@ -138,10 +144,13 @@ int main(int argc, char *argv[]) {
 
 					consultarContenido(sd, msg);
 					break;
-				case 3:
-
-					consultarInformacionContenido(sd, msg);
+				case 3: {
+					uint8_t id;
+					printf("Ingrese id que desea obtener info\r\n");
+					scanf("%d", &id);
+					consultarInformacionContenido(sd, id, msg);
 					break;
+				}
 				case 4:
 
 					desconectar(sd, msg);
@@ -152,13 +161,13 @@ int main(int argc, char *argv[]) {
 				}
 				//	system("clear");
 			}
-		} else { //Parent process - Server
+		} else { //Child process  - Server
 			printf("Este es otro proceso, para el server\n");
 
 			printf("Servidor\r\n");
 
 			servidor.sin_family = AF_INET;
-			servidor.sin_port = htons(4444);
+			servidor.sin_port = htons(4455);
 			servidor.sin_addr.s_addr = INADDR_ANY;
 
 			sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -248,4 +257,3 @@ int main(int argc, char *argv[]) {
 
 	close(sd);
 }
-

@@ -1,132 +1,72 @@
-//------------------------------------------------------------------------------
-
-// Lee un mensaje de aplicacion completo. Recibe en auxBuf y lo copia a
-
-// la estructura msg. Retorna la cantidad de bytes leidos o 0 si se cerro el socket.
-
-//------------------------------------------------------------------------------
-
 int readMsg(int sd, struct protocolo_t *msg) {
+	unsigned char totalLen, pos = 0, act=0;
+	char auxBuf[512];
+	char *ptr = 0;
+	int j, bytes = 1, buffered = 0;
 
-unsigned char totalLen, pos = 0, act=0;
+	for (j = 0; j < 512; j++)
+		auxBuf[j] = 0x00;
 
-char auxBuf[512];
+	ptr = auxBuf;
 
-char *ptr = 0;
+	//Recibe el primer byte (longitud total del mensaje)
+	if (recv(sd, ptr, 1, 0) == 0)//si recv retorna 0: indica que el socket fue cerrado
+		return 0;
 
-int j, bytes = 1, buffered = 0;
+	//Evalua longitud total del mensaje
+	totalLen = auxBuf[0];
+	ptr++;
+	pos++;
 
+	//Se asegura de recibe lo que resta del mensaje
+	while ((buffered < totalLen - 1) && (bytes > 0)) {
+		bytes = recv(sd, ptr + buffered, totalLen - buffered, 0);
+		buffered = buffered + bytes;
+		if (bytes == 0)	//si recv retorna 0: indica que el socket fue cerrado
+			return 0;
+	}
 
+	totalLen = auxBuf[0];
+	memcpy(&msg->LEN, &auxBuf[act], sizeof(char));
+	act += sizeof(char);
+	memcpy(&msg->ID_USER, &auxBuf[act], sizeof(msg->ID_USER));
+	act+= sizeof(msg->ID_USER);
+	memcpy(&msg->TYPE, &auxBuf[act], sizeof(char));
+	act+= sizeof(char);
+	memcpy(&msg->MSG, &auxBuf[act], totalLen - 1);
 
-for (j = 0; j < 512; j++)
-
-auxBuf[j] = 0x00;
-
-
-
-ptr = auxBuf;
-
-
-
-//Recibe el primer byte (longitud total del mensaje)
-
-if (recv(sd, ptr, 1, 0) == 0)//si recv retorna 0: indica que el socket fue cerrado
-
-return 0;
-
-
-
-//Evalua longitud total del mensaje
-
-totalLen = auxBuf[0];
-
-ptr++;
-
-pos++;
-
-
-
-//Se asegura de recibe lo que resta del mensaje
-
-while ((buffered < totalLen - 1) && (bytes > 0)) {
-
-bytes = recv(sd, ptr + buffered, totalLen - buffered, 0);
-
-buffered = buffered + bytes;
-
-if (bytes == 0) //si recv retorna 0: indica que el socket fue cerrado
-
-return 0;
-
+	return totalLen;
 }
-
-
-
-totalLen = auxBuf[0];
-
-memcpy(&msg->LEN, &auxBuf[act], sizeof(char));
-
-act += sizeof(char);
-
-char userId[2];
-
-userId[0]=&auxBuf[act];act++;
-
-userId[1]=&auxBuf[act];
-
-parser_t idUser= charToInt((char*) userId);
-
-memcpy(&msg->ID_USER, &idUser.id, sizeof(msg->ID_USER));
-
-act+= sizeof(msg->ID_USER);
-
-memcpy(&msg->TYPE, &auxBuf[act], sizeof(char));
-
-act+= sizeof(char);
-
-memcpy(&msg->MSG, &auxBuf[act], totalLen - 1);
-
-
-
-return totalLen;
-
-}
-
 
 //------------------------------------------------------------------------------
 // Escribe un mensaje de aplicacion completo. Recibe en msg y lo copia
 // al auxBuf. Retorna el resultado del send.
 //------------------------------------------------------------------------------
 int writeMsg(int sd, struct protocolo_t *msg) {
-char txBuf[P_SIZE];
+	char txBuf[P_SIZE];
 
-unsigned char typeLen, msgLen, totalLen ;
-totalLen=0;
-//Calcula longitud del mensaje
+	unsigned char typeLen, msgLen, totalLen, userIdLen;
+	totalLen=0;
+	//Calcula longitud del mensaje
 
-msgLen = strlen(msg->MSG);
-typeLen = sizeof(msg->TYPE);
-
-
-//Arma el mensaje de longitud variable en el buffer de transmisi�n
+	msgLen = strlen(msg->MSG);
+	typeLen = sizeof(msg->TYPE);
+	userIdLen = sizeof(msg->ID_USER);
 
 
-  parser_t userId = intToChar(msg->ID_USER);
+	//Arma el mensaje de longitud variable en el buffer de transmisi�n
 
+	totalLen++;
+	memcpy(&txBuf[totalLen], &msg->ID_USER, sizeof(userIdLen));
+	totalLen+=userIdLen;
+	memcpy(&txBuf[totalLen], &msg->TYPE, typeLen);
+	totalLen+=typeLen;
+	memcpy(&txBuf[totalLen], &msg->MSG, msgLen);
+	totalLen+=msgLen;
+	txBuf[0] = totalLen;	//Escribe longitud en el buffer
+	txBuf[totalLen + 1] = '\0';									//Escribe fin
 
-totalLen++;
-memcpy(&txBuf[totalLen], &userId.low, sizeof(userId.low));
-totalLen+=userId.low;
-memcpy(&txBuf[totalLen], &userId.hi, sizeof(userId.hi));
-totalLen+=userId.hi;
-memcpy(&txBuf[totalLen], &msg->TYPE, typeLen);
-totalLen+=typeLen;
-memcpy(&txBuf[totalLen], &msg->MSG, msgLen);
-totalLen+=msgLen;
-txBuf[0] = totalLen; //Escribe longitud en el buffer
-txBuf[totalLen + 1] = '\0'; //Escribe fin
-
-return send(sd, txBuf, totalLen, 0);
+	return send(sd, txBuf, totalLen, 0);
 }
 //------------------------------------------------------------------------------
 
@@ -268,17 +208,4 @@ void DataToBytes(data_t data, struct protocolo_t *msg)
 	memcpy(msg->MSG, dataMessage, act);
 }
 
-parser_t intToChar(uint16_t source){
-parser_t result;
-result.low= (char) (source & 0x00FF);
-result.hi= (char) (source & 0xFF00);
-return result;
-}
-
-parser_t charToInt(char* source)
-{
-parser_t result;
-result.id = source[0] | source[1];
-return result;
-}
 

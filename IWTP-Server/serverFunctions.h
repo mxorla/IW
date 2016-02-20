@@ -1,5 +1,5 @@
 //FUNCTIONS PROTOTYPES
-void agregarUsuario(uint16_t idUsuario, int socketNbr);
+void agregarUsuario(uint8_t idUsuario, int socket);
 int buscarGrupoUsuario(int aux);
 int buscarPosicionUsuario(int aux);
 int buscarPosicionPorSocket(int aux);
@@ -12,19 +12,19 @@ int getPosContentArray();
 //------------------------------------------------------------------------------
 // Si el usuario no esta en el array lo agrega.
 //------------------------------------------------------------------------------
-void agregarUsuario(uint16_t idUsuario, int socketNbr) {
+void agregarUsuario(uint8_t idUsuario, int socket) {
 	int pos=0, userPos=0;
 
 	userPos = buscarPosicionUsuario(idUsuario);
 	//Si el usuario aun no fue agregado lo agrega
 	if(userPos == -1) {
 		pos = getPosUserArray();
-		usersArray[pos].socketNumber = socketNbr; //agregarlo en la ultima pos disponible
+		usersArray[pos].socketNumber = socket; //agregarlo en la ultima pos disponible
 		usersArray[pos].idUsuario = idUsuario;
 	}
 	//Si ya existe es una reconexion
 	else {
-		usersArray[userPos].socketNumber = socketNbr;	//Solo actualiza el socket
+		usersArray[userPos].socketNumber = socket;	//Solo actualiza el socket
 	}
 
 }
@@ -105,6 +105,8 @@ void publicarContenido(struct protocolo_t *msg)
 
 		contentsArray[posContent].id_content=posContent + 1;
 		contentsArray[posContent].propietario.id = msg->ID_USER;
+		strcpy(contentsArray[posContent].propietario.ip, "999.999.9.9");
+		strcpy(contentsArray[posContent].propietario.puerto, "5959");
 		contentsArray[posContent].det=data.det;
 	}
 }
@@ -178,14 +180,14 @@ void consultarInformacionContenido(int sd, struct protocolo_t *msg)
 	char dataMessage[200];
 	act = 1; //en 0 cantidad de contenidos
 	msg->LEN=4;
-	msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+	msg->ID_USER=(uint8_t) sd;
 	msg->TYPE=3; //TODO: ver tipo
 
 	for(j = 0; j < MAX_CONTENTS; j++) {
 		if(contentsArray[j].id_content == id)
 		{
 			//Longitud de ip
-			dataMessage[act] = (uint8_t) strlen(contentsArray[j].propietario.ip);
+			dataMessage[act] = strlen(contentsArray[j].propietario.ip);
 			act++;
 
 			//Secuencia de ip
@@ -195,11 +197,11 @@ void consultarInformacionContenido(int sd, struct protocolo_t *msg)
 			}
 
 			//Longitud de puerto
-			dataMessage[act] = (uint8_t) strlen(contentsArray[j].propietario.puerto);
+			dataMessage[act] =  sizeof(contentsArray[j].propietario.puerto);
 			act++;
 
 			//Secuencia de puerto
-			for(i = 0; i < strlen(contentsArray[j].propietario.puerto); i++){
+			for(i = 0; i < sizeof(contentsArray[j].propietario.puerto); i++){
 				dataMessage[act] = contentsArray[j].propietario.puerto[i];
 				act++;
 			}

@@ -17,13 +17,13 @@
 //STRUCTURE DEFINITIONS
 struct protocolo_t {
 	unsigned char LEN;
-	uint16_t ID_USER;
+	uint8_t ID_USER;
 	char TYPE; 	
 	char MSG[MSG_LEN];  			//valor maximo 200 bytes
 };
 
 typedef struct {
-	uint16_t idUsuario;
+	uint8_t idUsuario;
 	int socketNumber;
 }users_t;
 
@@ -44,7 +44,7 @@ typedef struct {
 
 
 typedef struct {
-	uint16_t id;
+	uint8_t id;
 	char ip[15];
 	char puerto[4];
 }prop_t;
@@ -55,11 +55,7 @@ prop_t propietario;
 det_t det;
 }content_t;
 
-typedef struct {
-uint16_t id;
-char low;
-char hi;
-}parser_t;
+
 
 //VARs
 users_t usersArray[MAX_CONNECTIONS];
@@ -71,6 +67,5 @@ int readMsg(int sd, struct protocolo_t *msg);
 int writeMsg(int sd, struct protocolo_t *msg);
 data_t BytesToData(struct protocolo_t *msg);
 void DataToBytes(data_t data, struct protocolo_t *msg);
-parser_t intToChar(uint16_t source);
-parser_t charToInt(char* source);
+
 

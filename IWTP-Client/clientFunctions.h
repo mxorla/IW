@@ -3,7 +3,7 @@
 void conectar(int sd,struct protocolo_t *msg);
 void publicarContenido(int sd, struct protocolo_t *msg);
 void consultarContenido(int sd, struct protocolo_t *msg);
-void consultarInformacionContenido(int sd, struct protocolo_t *msg);
+void consultarInformacionContenido(int sd,uint8_t id, struct protocolo_t *msg);
 void desconectar(int sd, struct protocolo_t *msg);
 void bloquearContenido(int sd, struct protocolo_t *msg);
 void desbloquearContenido(int sd, struct protocolo_t *msg);
@@ -78,18 +78,16 @@ void consultarContenido(int sd, struct protocolo_t *msg)
 		writeMsg(sd, msg);
 }
 
-void consultarInformacionContenido(int sd, struct protocolo_t *msg)
+void consultarInformacionContenido(int sd,uint8_t id, struct protocolo_t *msg)
 {
-		uint8_t id;
-		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+
+
+
+		msg->LEN= 5;
+		msg->ID_USER=(uint8_t) sd;
 		msg->TYPE=4;
-
-		printf("Ingrese id que desea obtener info\r\n");
-							scanf("%d",&id);
-
-		msg->LEN= 4 + sizeof(id);
-		memcpy(msg->MSG, &id, sizeof(id));
-		msg->MSG[sizeof(id)]='\0';
+		msg->MSG[0]=id;
+		msg->MSG[1]='\0';
 
 		writeMsg(sd, msg);
 }
@@ -97,7 +95,7 @@ void consultarInformacionContenido(int sd, struct protocolo_t *msg)
 void desconectar(int sd, struct protocolo_t *msg)
 {
 	    msg->LEN=4;
-		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+	    msg->ID_USER=(uint8_t) sd;
 		msg->TYPE=5;
 
 

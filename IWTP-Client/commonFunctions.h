@@ -3,10 +3,10 @@
 // la estructura msg. Retorna la cantidad de bytes leidos o 0 si se cerro el socket.
 //------------------------------------------------------------------------------
 int readMsg(int sd, struct protocolo_t *msg) {
-	unsigned char totalLen, pos = 0, act=0;
+	unsigned char totalLen, pos = 0;
 	char auxBuf[512];
 	char *ptr = 0;
-	int j, bytes = 1, buffered = 0;
+	int j, bytes = 1, buffered = 0,act=0;
 
 	for (j = 0; j < 512; j++)
 		auxBuf[j] = 0x00;
@@ -55,7 +55,7 @@ int writeMsg(int sd, struct protocolo_t *msg) {
 
 	msgLen = strlen(msg->MSG);
 	typeLen = sizeof(msg->TYPE);
-	userIdLen = sizeof(msg->TYPE);
+	userIdLen = sizeof(msg->ID_USER);
 
 
 	//Arma el mensaje de longitud variable en el buffer de transmisi�n
@@ -109,27 +109,27 @@ content_t BytesToData(int *act, struct protocolo_t *msg) {
 	return content;
 }
 
-content_t BytesToDataIp(int *act, struct protocolo_t *msg) {
+content_t BytesToDataIp(struct protocolo_t *msg) {
 	content_t content;
-
+	int act = 1;
 	int i, j;
-	uint8_t longIp = msg->MSG[*act];
-	*act = *act + 1;
+	uint8_t longIp = msg->MSG[act];
+	act++;
 	for (i = 0; i < longIp; i++) {
-		content.propietario.ip[i] = msg->MSG[i + *act];
-		*act = *act + 1;
+		content.propietario.ip[i] = msg->MSG[act];
+		act++;
 		}
-	uint8_t longPort = msg->MSG[*act];
-	*act = *act + 1;
+	uint8_t longPort = msg->MSG[act];
+	act++;
 		for (i = 0; i < longPort; i++) {
-			content.propietario.puerto[i] = msg->MSG[i + *act];
-			*act = *act + 1;
+			content.propietario.puerto[i] = msg->MSG[act];
+			act++;
 			}
 
-	content.det.lent = msg->MSG[*act];
-	*act = *act + 1;
+	content.det.lent = msg->MSG[act];
+	act++;
 	for (i = 0; i < content.det.lent; i++) {
-		content.det.title[i] = msg->MSG[i + *act];
+		content.det.title[i] = msg->MSG[act];
 	}
 	content.det.title[content.det.lent] = '\0';
 

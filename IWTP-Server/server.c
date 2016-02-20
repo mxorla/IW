@@ -45,6 +45,7 @@ int main (void) {
 		if (FD_ISSET(sd , &copia)) { // Recibe un cliente que se quiere conectar
 			lon = sizeof(cliente);
 			sdc = accept (sd, (struct sockaddr *) &cliente, &lon);
+
 			FD_SET(sdc, &conjunto);
 			agregarUsuario(sdc, sdc);
 			//Responde q esta conectado
