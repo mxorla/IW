@@ -104,7 +104,7 @@ void publicarContenido(struct protocolo_t *msg)
 		}
 		act += data.det.lend;
 
-
+		contentsArray[posContent].id_content=posContent + 1;
 		contentsArray[posContent].propietario=msg->ID_USER;
 		contentsArray[posContent].det=data.det;
 	}
@@ -136,6 +136,9 @@ void consultarContenido(int sd,struct protocolo_t *msg)
 			break;
 		}
 		cant++;
+
+		dataMessage[act] = contentsArray[j].id_content;
+		act++;
 
 		dataMessage[act] = contentsArray[j].det.lent;
 		act++;

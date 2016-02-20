@@ -44,6 +44,7 @@ typedef struct {
 
 
 typedef struct {
+	uint8_t id_content;
 	uint16_t propietario;
 	det_t det;
 }content_t;

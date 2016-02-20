@@ -44,6 +44,7 @@ typedef struct {
 
 
 typedef struct {
+	uint8_t id_content;
 	uint16_t propietario;
 	det_t det;
 }content_t;
@@ -56,5 +57,5 @@ int currentPosition=0;
 //FUNCTIONS PROTOTYPES
 int readMsg(int sd, struct protocolo_t *msg);
 int writeMsg(int sd, struct protocolo_t *msg);
-data_t BytesToData(int *act, struct protocolo_t *msg);
+content_t BytesToData(int *act, struct protocolo_t *msg);
 void DataToBytes(int act, data_t data, struct protocolo_t *msg);

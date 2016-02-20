@@ -18,7 +18,7 @@ users_t user;
 //------------------------------------------------------------------------------
 void *checkConnections(void *data) {
 	int interval = *(int *)data;
-	int nro;data_t de;
+	int nro;content_t de;
 	while(1) {	
 		if(readMsg(sd, msg) > 0) {
 
@@ -33,12 +33,12 @@ void *checkConnections(void *data) {
 
 
 				int j,cant,act = 1;
-				printf("     Titulo     |     Autor     |     Descripcion     |     Propietario\r\n");
+				printf("	ID     |     Titulo     |     Autor     |     Descripcion     |     Propietario\r\n");
 				printf("---------------------------------------------------------------------- \r\n");
 				cant = msg->MSG[0];
 				for	(j=0; j< cant;j++){
 					de = BytesToData(&act, msg);
-					printf("%s           %s        ", de.det.title, de.det.aut);
+					printf("%d			%s           %s        ", de.id_content, de.det.title, de.det.aut);
 					printf("%s        %s", de.det.desc, "prop");
 					printf("\r\n");
 				}

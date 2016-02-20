@@ -57,11 +57,11 @@ int writeMsg(int sd, struct protocolo_t *msg) {
 	idUserLength=sizeof(msg->ID_USER);
 		
 	//Arma el mensaje de longitud variable en el buffer de transmisi�n
-		txBuf[0] = totalLen;											//Escribe longitud en el buffer
-		memcpy(&txBuf[1], &msg->ID_USER, idUserLength);
-		memcpy(&txBuf[2], &msg->TYPE, sizeof(char));
-		memcpy(&txBuf[3], &msg->MSG, msgLen);
-		txBuf[totalLen+1] = '\0';										//Escribe fin
+	txBuf[0] = totalLen;											//Escribe longitud en el buffer
+	memcpy(&txBuf[1], &msg->ID_USER, idUserLength);
+	memcpy(&txBuf[2], &msg->TYPE, sizeof(char));
+	memcpy(&txBuf[3], &msg->MSG, msgLen);
+	txBuf[totalLen+1] = '\0';										//Escribe fin
 
 
 	return send(sd, txBuf, totalLen, 0);
