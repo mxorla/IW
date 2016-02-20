@@ -82,7 +82,6 @@ void publicarContenido(struct protocolo_t *msg)
 	for(j=0; j <  data.count ;j++){
 		posContent = getPosContentArray();
 
-
 		data.det.lent = msg->MSG[act];
 		act++;
 		for(i=0; i <  data.det.lent;i++){

@@ -7,6 +7,8 @@ void consultarInformacionContenido(int sd, struct protocolo_t *msg);
 void desconectar(int sd, struct protocolo_t *msg);
 void bloquearContenido(int sd, struct protocolo_t *msg);
 void desbloquearContenido(int sd, struct protocolo_t *msg);
+void lookUpContent(int sd, struct protocolo_t *msg);
+int buscarPosicionPorSocket(int aux);
 
 
 //------------------------------------------------------------------------------
@@ -24,17 +26,16 @@ void conectar(int sd, struct protocolo_t *msg) {
 
 void publicarContenido(int sd, struct protocolo_t *msg)
 {
-		msg->LEN=14;
+	    //msg->LEN=14;
+	    msg->LEN=2;
 		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
 		msg->TYPE=2;
 		data_t data;
-		char dataMessage[200];
 		int i, act;
 		char opt = 's';
         act = 1;
         i=1;
 		while (act < 191 && (opt == 's' || opt =='S')){
-		// hacer un loop para cargar varios contenidos por ahora va 1
 				printf("Ingrese Titulo\r\n");
 				scanf("%s", data.det.title);
 				data.det.lent =  strlen(data.det.title);
@@ -45,7 +46,7 @@ void publicarContenido(int sd, struct protocolo_t *msg)
 
 				printf("Ingrese Descripcion\r\n");
 				scanf("%s", data.det.desc);
-				scanf("%c",&opt); /* Absorbo el avance de línea */
+				scanf("%c",&opt); /* avance de línea */
 				data.det.lend =  strlen(data.det.desc);
 
 				data.count = (uint8_t) i;
@@ -55,6 +56,7 @@ void publicarContenido(int sd, struct protocolo_t *msg)
 
 				act += data.det.lent + data.det.lena +data.det.lend +3;
 
+				msg->LEN += strlen(msg->MSG);
 
 				printf("Ingresar otro contenido? s/n \r\n");
 				scanf("%c", &opt);
@@ -78,16 +80,16 @@ void consultarContenido(int sd, struct protocolo_t *msg)
 
 void consultarInformacionContenido(int sd, struct protocolo_t *msg)
 {
-	    char title[50];
+		uint8_t id;
 		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
 		msg->TYPE=4;
 
-		printf("Ingrese Titulo que desea obtener info\r\n");
-							scanf("%s",title);
+		printf("Ingrese id que desea obtener info\r\n");
+							scanf("%d",&id);
 
-		msg->LEN= 4 + strlen(title);
-		memcpy(msg->MSG, title, strlen(title));
-		msg->MSG[strlen(title)]='\0';
+		msg->LEN= 4 + sizeof(id);
+		memcpy(msg->MSG, &id, sizeof(id));
+		msg->MSG[sizeof(id)]='\0';
 
 		writeMsg(sd, msg);
 }
@@ -146,6 +148,45 @@ void desbloquearContenido(int sd, struct protocolo_t *msg)
 		msg->MSG[13]='\0';
 
 		writeMsg(sd, msg);
+}
+
+//------------------------------------------------------------------------------
+// Busca usuario por socket, si lo encuentra retorna posicion en el array, sino -1.
+//------------------------------------------------------------------------------
+int buscarPosicionPorSocket(int aux) {
+	int i, ret=-1;
+
+	for(i=0;i< MAX_CONNECTIONS;i++) {
+		if(usersArray[i].socketNumber == aux) {
+			ret = i;
+			break;
+		}
+	}
+	return ret;
+}
+
+void lookUpContent(int sd, struct protocolo_t *msg)
+{
+	/*
+	FILE * fp;
+	char * line = NULL;
+	size_t len = 0;
+	ssize_t read;
+
+	fp = fopen("/home/joaquin/tmp/test.txt", "r");
+	while ((read = getline(&line, &len, fp)) != -1) {
+		printf("Retrieved line of length %zu :\n", read);
+		printf("%s", line);
+	}
+
+	fclose(fp);
+	if (line) {
+		free(line);
+	}
+	*/
+	//TODO hacer streaming de archivo
+	writeMsg(sd, msg);
+
 }
 
 
