@@ -11,6 +11,20 @@ int sd;
 struct protocolo_t *msg;
 char txBuf[P_SIZE];
 users_t user;
+uint8_t userIdAssigned;
+
+
+void printMenu(){
+	system("clear");
+	printf("Menu\n");
+
+					printf("1 -		Publicar Contenido\n");
+					printf("2 -		Consultar Contenido\n");
+					printf("3 -		Consultar Informacion Contenido\n");
+					printf("4 -		Desconectar\n");
+
+					printf("------------------------------------------------------\r\n");
+}
 
 //------------------------------------------------------------------------------
 // chequear si hay mensajes. esto es por si algun usuario manda algo... no va
@@ -26,7 +40,15 @@ void *checkConnections(void *data) {
 
 			switch (msg->TYPE) {
 			case 1: {
+				system("clear");
+					printf("Menu\n");
 
+									printf("1 -		Publicar Contenido\n");
+									printf("2 -		Consultar Contenido\n");
+									printf("3 -		Consultar Informacion Contenido\n");
+									printf("4 -		Desconectar\n");
+
+									printf("------------------------------------------------------\r\n");
 				int j, cant, act = 1;
 				printf(
 						"	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
@@ -39,14 +61,16 @@ void *checkConnections(void *data) {
 					printf("%d			%s           %s        %s", de.id_content,
 							de.det.title, de.det.aut, de.det.desc);
 					printf("\r\n");
-				}
 
+				}
+				printf(">");
 				break;
 			}
 			case 2: {
 			}
 				break;
 			case 3: {
+				printMenu();
 				printf("Datos del contenido \r\n");
 				printf("	 Titulo     |        Propietario IP \r\n");
 				printf(
@@ -56,12 +80,14 @@ void *checkConnections(void *data) {
 				printf("     %s                  %s", de.det.title, de.propietario.ip);
 
 			}
+			printf(">");
 
 				break;
 			case 4: {
 			}
 				break;
 			default: {
+				userIdAssigned = msg->ID_USER;
 				printf("Ya esta conectado con el servidor, su id de usuario es %d  \r\n", msg->ID_USER);
 				if (msg->LEN != 0) {
 					printf("El Servidor Respondio --->   %s\n", msg->MSG);
@@ -97,6 +123,8 @@ int main(int argc, char *argv[]) {
 	pthread_t thread;
 	pid_t childPID;
 
+
+
 	childPID = fork();
 
 	if (childPID >= 0) {	// fork was successful
@@ -128,35 +156,44 @@ int main(int argc, char *argv[]) {
 
 			while (1) {
 				int opcion;
-				printf("Menu\n");
+			//system("clear");
 
-				printf("1 -		Publicar Contenido\n");
-				printf("2 -		Consultar Contenido\n");
-				printf("3 -		Consultar Informacion Contenido\n");
-				printf("4 -		Desconectar\n");
-				scanf("%d", &opcion); //Leyendo opcion
+				printMenu();
 
 				switch (opcion) {
-				case 1:
-					publicarContenido(sd, msg);
+				case 1:{
+					publicarContenido(sd,userIdAssigned, msg);
+					printMenu();
+					printf(">");
+									scanf("%d", &opcion); //Leyendo opcion
+				}
 					break;
 				case 2:
-
-					consultarContenido(sd, msg);
+				{
+					consultarContenido(sd,userIdAssigned, msg);
+					 //Leyendo opcion
+				}
 					break;
 				case 3: {
 					uint8_t id;
 					printf("Ingrese id que desea obtener info\r\n");
 					scanf("%d", &id);
-					consultarInformacionContenido(sd, id, msg);
+					consultarInformacionContenido(sd, id,userIdAssigned, msg);
+					printf(">");
+									scanf("%d", &opcion); //Leyendo opcion
 					break;
 				}
 				case 4:
-
-					desconectar(sd, msg);
+				{
+					desconectar(sd,userIdAssigned, msg);
+					printf(">");
+									scanf("%d", &opcion); //Leyendo opcion
+									}
 					break;
-				default:
-					printf("0");
+				default:{
+					printf(">");
+									scanf("%d", &opcion); //Leyendo opcion
+				}
 					break;
 				}
 				//	system("clear");
@@ -257,3 +294,7 @@ int main(int argc, char *argv[]) {
 
 	close(sd);
 }
+
+
+
+
