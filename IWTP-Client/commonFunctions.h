@@ -115,16 +115,16 @@ content_t BytesToDataIp(struct protocolo_t *msg) {
 	int i, j;
 	uint8_t longIp = msg->MSG[act];
 	act++;
+
 	for (i = 0; i < longIp; i++) {
 		content.propietario.ip[i] = msg->MSG[act];
 		act++;
 		}
-	uint8_t longPort = msg->MSG[act];
+	uint8_t lowPort = msg->MSG[act];
 	act++;
-		for (i = 0; i < longPort; i++) {
-			content.propietario.puerto[i] = msg->MSG[act];
-			act++;
-			}
+	uint8_t hiPort = msg->MSG[act];
+    act++;
+  content.propietario.puerto = ((uint16_t) hiPort << 8)  | lowPort;
 
 	content.det.lent = msg->MSG[act];
 	act++;

@@ -23,8 +23,15 @@ struct protocolo_t {
 };
 
 typedef struct {
+	uint8_t id;
+	char ip[15];
+	uint16_t puerto;
+}prop_t;
+
+typedef struct {
 	uint8_t idUsuario;
 	int socketNumber;
+	prop_t address;
 }users_t;
 
 typedef struct {
@@ -42,11 +49,7 @@ typedef struct {
 }data_t;
 
 
-typedef struct {
-	uint8_t id;
-	char ip[15];
-	char puerto[4];
-}prop_t;
+
 
 typedef struct {
 	uint8_t id_content;

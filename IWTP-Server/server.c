@@ -31,7 +31,7 @@ int main (void) {
     const int       optVal = 0;
     const socklen_t optLen = sizeof(optVal);
 
-   setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+    setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
 
     listen(sd, 5);
 
@@ -47,7 +47,7 @@ int main (void) {
 			sdc = accept (sd, (struct sockaddr *) &cliente, &lon);
 
 			FD_SET(sdc, &conjunto);
-			agregarUsuario(sdc, sdc);
+			agregarUsuario(cliente, sdc);
 			//Responde q esta conectado
 									msg->LEN=14;
 									//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);

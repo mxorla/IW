@@ -1,10 +1,10 @@
 
 //FUNCTIONS PROTOTYPES
 void conectar(int sd,struct protocolo_t *msg);
-void publicarContenido(int sd, struct protocolo_t *msg);
-void consultarContenido(int sd, struct protocolo_t *msg);
-void consultarInformacionContenido(int sd,uint8_t id, struct protocolo_t *msg);
-void desconectar(int sd, struct protocolo_t *msg);
+void publicarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg);
+void consultarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg);
+void consultarInformacionContenido(int sd,uint8_t id,uint8_t userIdAssigned, struct protocolo_t *msg);
+void desconectar(int sd, uint8_t userIdAssigned,struct protocolo_t *msg);
 void bloquearContenido(int sd, struct protocolo_t *msg);
 void desbloquearContenido(int sd, struct protocolo_t *msg);
 void lookUpContent(int sd, struct protocolo_t *msg);
@@ -17,18 +17,18 @@ int buscarPosicionPorSocket(int aux);
 void conectar(int sd, struct protocolo_t *msg) {
 
 	msg->LEN=4;
-	msg->ID_USER= (uint16_t) ~((unsigned int) sd);
+	msg->ID_USER= (uint8_t) sd;
 	msg->TYPE=1;
 	msg->MSG[0]='\0';
 
 	writeMsg(sd, msg);
 }
 
-void publicarContenido(int sd, struct protocolo_t *msg)
+void publicarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg)
 {
 	    //msg->LEN=14;
 	    msg->LEN=2;
-		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->ID_USER=userIdAssigned;
 		msg->TYPE=2;
 		data_t data;
 		int i, act;
@@ -68,23 +68,23 @@ void publicarContenido(int sd, struct protocolo_t *msg)
 
 }
 
-void consultarContenido(int sd, struct protocolo_t *msg)
+void consultarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg)
 {
 	    msg->LEN=4;
-		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
+		msg->ID_USER=userIdAssigned;
 		msg->TYPE=3;
 		msg->MSG[0]='\0';
 
 		writeMsg(sd, msg);
 }
 
-void consultarInformacionContenido(int sd,uint8_t id, struct protocolo_t *msg)
+void consultarInformacionContenido(int sd,uint8_t id, uint8_t userIdAssigned,struct protocolo_t *msg)
 {
 
 
 
 		msg->LEN= 5;
-		msg->ID_USER=(uint8_t) sd;
+		msg->ID_USER=userIdAssigned;
 		msg->TYPE=4;
 		msg->MSG[0]=id;
 		msg->MSG[1]='\0';
@@ -92,10 +92,10 @@ void consultarInformacionContenido(int sd,uint8_t id, struct protocolo_t *msg)
 		writeMsg(sd, msg);
 }
 
-void desconectar(int sd, struct protocolo_t *msg)
+void desconectar(int sd, uint8_t userIdAssigned, struct protocolo_t *msg)
 {
 	    msg->LEN=4;
-	    msg->ID_USER=(uint8_t) sd;
+	    msg->ID_USER=userIdAssigned;
 		msg->TYPE=5;
 
 

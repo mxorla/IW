@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 
 			sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 			servidor.sin_family = AF_INET;
-			servidor.sin_port = htons(4444);
+			servidor.sin_port = htons(4455);
 
 			if (h = gethostbyname(argv[1])) {
 				memcpy(&servidor.sin_addr, h->h_addr, h->h_length);
