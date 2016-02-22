@@ -8,22 +8,30 @@
 #include <ctype.h>
 
 int sd;
+int sd;
+int Clisd;
 struct protocolo_t *msg;
 char txBuf[P_SIZE];
 users_t user;
 uint8_t userIdAssigned;
+prop_t CliServer;
 
+struct sockaddr_in Cliservidor;
+int Clilon;
+struct hostent * Clih;
+pthread_t Clithread;
 
-void printMenu(){
-	system("clear");
+void printMenu() {
+//TODO:	system("clear");
 	printf("Menu\n");
 
-					printf("1 -		Publicar Contenido\n");
-					printf("2 -		Consultar Contenido\n");
-					printf("3 -		Consultar Informacion Contenido\n");
-					printf("4 -		Desconectar\n");
+	printf("1 -		Publicar Contenido\n");
+	printf("2 -		Consultar Contenido\n");
+	printf("3 -		Consultar Informacion Contenido\n");
+	printf("4 -		Desconectar\n");
 
-					printf("------------------------------------------------------\r\n");
+	printf(
+			"---------------------------------------------------------------------- \r\n");
 }
 
 //------------------------------------------------------------------------------
@@ -40,15 +48,7 @@ void *checkConnections(void *data) {
 
 			switch (msg->TYPE) {
 			case 1: {
-				system("clear");
-					printf("Menu\n");
-
-									printf("1 -		Publicar Contenido\n");
-									printf("2 -		Consultar Contenido\n");
-									printf("3 -		Consultar Informacion Contenido\n");
-									printf("4 -		Desconectar\n");
-
-									printf("------------------------------------------------------\r\n");
+				//printMenu();
 				int j, cant, act = 1;
 				printf(
 						"	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
@@ -63,7 +63,7 @@ void *checkConnections(void *data) {
 					printf("\r\n");
 
 				}
-				printf(">");
+				printf("> \r");
 				break;
 			}
 			case 2: {
@@ -72,26 +72,38 @@ void *checkConnections(void *data) {
 			case 3: {
 				printMenu();
 				printf("Datos del contenido \r\n");
-				printf("	 Titulo     |        Propietario IP \r\n");
+				printf("	 Titulo     |        Propietario IP:PUERTO \r\n");
 				printf(
 						"---------------------------------------------------------------------- \r\n");
 
 				de = BytesToDataIp(msg);
-				printf("     %s                  %s", de.det.title, de.propietario.ip);
+				printf("     %s                  %s:%d", de.det.title,
+						de.propietario.ip, de.propietario.puerto);
+				printf("> \r");
+
+				iniciarStreaming(de, msg);
 
 			}
-			printf(">");
-
 				break;
 			case 4: {
 			}
 				break;
-			default: {
+
+			case 99: {
 				userIdAssigned = msg->ID_USER;
-				printf("Ya esta conectado con el servidor, su id de usuario es %d  \r\n", msg->ID_USER);
+				printf(
+						"Ya esta conectado con el servidor, su id de usuario es %d  \r\n",
+						msg->ID_USER);
 				if (msg->LEN != 0) {
 					printf("El Servidor Respondio --->   %s\n", msg->MSG);
 				}
+
+				SendCliServerData(sd, userIdAssigned, CliServer, msg);
+
+			}
+				break;
+			default: {
+				printf("Mensaje desconocido");
 			}
 			}
 
@@ -123,12 +135,12 @@ int main(int argc, char *argv[]) {
 	pthread_t thread;
 	pid_t childPID;
 
-
+	loadConfiguration();
 
 	childPID = fork();
 
 	if (childPID >= 0) {	// fork was successful
-		if (childPID != 0) {	// Parent process- client
+		if (childPID == 0) {	// Parent process- client
 			if (argc < 2) {
 				printf(
 						"Debe configurar el parametro correspondiente a la IP del servidor\n",
@@ -138,7 +150,7 @@ int main(int argc, char *argv[]) {
 
 			sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 			servidor.sin_family = AF_INET;
-			servidor.sin_port = htons(4455);
+			servidor.sin_port = htons(4444);
 
 			if (h = gethostbyname(argv[1])) {
 				memcpy(&servidor.sin_addr, h->h_addr, h->h_length);
@@ -156,47 +168,50 @@ int main(int argc, char *argv[]) {
 
 			while (1) {
 				int opcion;
-			//system("clear");
+				//system("clear");
 
 				printMenu();
 
 				switch (opcion) {
-				case 1:{
-					publicarContenido(sd,userIdAssigned, msg);
+				case 1: {
+					publicarContenido(sd, userIdAssigned, msg);
 					printMenu();
-					printf(">");
-									scanf("%d", &opcion); //Leyendo opcion
+					printf("> \r");
+					scanf("%d", &opcion); //Leyendo opcion
 				}
 					break;
-				case 2:
-				{
-					consultarContenido(sd,userIdAssigned, msg);
-					 //Leyendo opcion
+				case 2: {
+					consultarContenido(sd, userIdAssigned, msg);
+
+					printf("> \r");
+					scanf("%d", &opcion); //Leyendo opcion
+					scanf("%d", &opcion); //Leyendo opcion
+
 				}
 					break;
 				case 3: {
 					uint8_t id;
 					printf("Ingrese id que desea obtener info\r\n");
 					scanf("%d", &id);
-					consultarInformacionContenido(sd, id,userIdAssigned, msg);
-					printf(">");
-									scanf("%d", &opcion); //Leyendo opcion
+					consultarInformacionContenido(sd, id, userIdAssigned, msg);
+					printf("> \r");
+					scanf("%d", &opcion); //Leyendo opcion
+					scanf("%d", &opcion); //Leyendo opcion
 					break;
 				}
-				case 4:
-				{
-					desconectar(sd,userIdAssigned, msg);
-					printf(">");
-									scanf("%d", &opcion); //Leyendo opcion
-									}
+				case 4: {
+					desconectar(sd, userIdAssigned, msg);
+					printf("> \r");
+					scanf("%d", &opcion); //Leyendo opcion
+				}
 					break;
-				default:{
-					printf(">");
-									scanf("%d", &opcion); //Leyendo opcion
+				default: {
+					printf("> \r");
+					scanf("%d", &opcion); //Leyendo opcion
 				}
 					break;
 				}
-				//	system("clear");
+
 			}
 		} else { //Child process  - Server
 			printf("Este es otro proceso, para el server\n");
@@ -204,7 +219,8 @@ int main(int argc, char *argv[]) {
 			printf("Servidor\r\n");
 
 			servidor.sin_family = AF_INET;
-			servidor.sin_port = htons(4455);
+			servidor.sin_port = htons(CliServer.puerto);
+			//		servidor.sin_port = htons(4455);
 			servidor.sin_addr.s_addr = INADDR_ANY;
 
 			sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -223,7 +239,7 @@ int main(int argc, char *argv[]) {
 
 			FD_ZERO(&conjunto);
 			FD_SET(sd, &conjunto);
-
+			msg = (struct protocolo_t *) buffer;
 			while (1) {
 				copia = conjunto;
 				select(FD_SETSIZE, &copia, NULL, NULL, NULL);
@@ -234,8 +250,8 @@ int main(int argc, char *argv[]) {
 					FD_SET(sdc, &conjunto);
 					//Responde q esta conectado
 					msg->LEN = 14;
-					msg->ID_USER = (uint16_t) ~((unsigned int) sdc);
-					msg->TYPE = 0;
+					msg->ID_USER = (uint8_t) sdc;
+					msg->TYPE = 8;
 					msg->MSG[0] = 'C';
 					msg->MSG[1] = 'o';
 					msg->MSG[2] = 'n';
@@ -254,12 +270,11 @@ int main(int argc, char *argv[]) {
 						if (FD_ISSET(sdc, &copia) && (sdc != sd)) {
 							msg = (struct protocolo_t *) buffer;
 							if ((n = readMsg(sdc, msg)) > 0) {
-								printf("Len: %u\n", msg->LEN);
-								printf("IDUSER: %i\n", sdc);
-								printf("Type: %i\n", msg->TYPE);
+								if (msg->TYPE == 1) {
 
-								printf("Look up content");
-								lookUpContent(sd, msg);
+									printf("Look up content");
+									lookUpContent(sdc, msg);
+								}
 							}
 							//Se cerro el socket
 							else {
@@ -295,6 +310,84 @@ int main(int argc, char *argv[]) {
 	close(sd);
 }
 
+void *checkConnectionsClientServer(void *data) {
+	int interval = *(int *) data;
+	int nro;
+	content_t de;
+	while (1) {
+		if (readMsg(Clisd, msg) > 0) {
 
+			//nro=0;
 
+			switch (msg->TYPE) {
 
+			case 2: {
+				printf("Iniciando Streaming \r\n");
+				guardarBuffer(msg);
+			}
+				break;
+			default: {
+				userIdAssigned = msg->ID_USER;
+				printf(
+						"Ya esta conectado con el clienteservidor, su id de usuario es %d  \r\n",
+						msg->ID_USER);
+				if (msg->LEN != 0) {
+					printf("El Servidor Respondio --->   %s\n", msg->MSG);
+					printf("Iniciando Conect Streaming \r\n");
+				}
+				solicitarFile(Clisd, msg);
+			}
+			}
+
+		}
+		usleep(interval);
+	}
+}
+
+void iniciarStreaming(content_t de, struct protocolo_t *msg) {
+
+	int interval = 30;
+
+	Clisd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	Cliservidor.sin_family = AF_INET;
+	Cliservidor.sin_port = htons(de.propietario.puerto);
+
+	if (Clih = gethostbyname(de.propietario.ip)) {
+		memcpy(&Cliservidor.sin_addr, Clih->h_addr, Clih->h_length);
+	}
+
+	Clilon = sizeof(Cliservidor);
+	if (connect(Clisd, (struct sockaddr *) &Cliservidor, Clilon) < 0) {
+		perror("Error en connect");
+		exit(-1);
+	}
+
+	msg = (struct protocolo_t *) txBuf;
+
+	pthread_create(&Clithread, NULL, checkConnectionsClientServer, &interval);
+
+	while (1) {
+
+	}
+	close(Clisd);
+}
+
+void loadConfiguration() {
+
+	FILE * fp;
+	char * line = NULL;
+	size_t len = 0;
+	ssize_t read;
+	fp = fopen("/home/mxorla/workspace/IWTP-Client/config", "r");
+	while ((read = getline(&line, &len, fp)) != -1) {
+
+		CliServer.puerto = (uint16_t) line;
+	}
+
+	fclose(fp);
+	if (line) {
+		free(line);
+	}
+
+	/*CliServer.puerto = 4455; */
+}

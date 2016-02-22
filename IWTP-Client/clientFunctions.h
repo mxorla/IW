@@ -1,161 +1,155 @@
-
 //FUNCTIONS PROTOTYPES
-void conectar(int sd,struct protocolo_t *msg);
-void publicarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg);
-void consultarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg);
-void consultarInformacionContenido(int sd,uint8_t id,uint8_t userIdAssigned, struct protocolo_t *msg);
-void desconectar(int sd, uint8_t userIdAssigned,struct protocolo_t *msg);
+void conectar(int sd, struct protocolo_t *msg);
+void publicarContenido(int sd, uint8_t userIdAssigned, struct protocolo_t *msg);
+void consultarContenido(int sd, uint8_t userIdAssigned, struct protocolo_t *msg);
+void consultarInformacionContenido(int sd, uint8_t id, uint8_t userIdAssigned,
+		struct protocolo_t *msg);
+void desconectar(int sd, uint8_t userIdAssigned, struct protocolo_t *msg);
 void bloquearContenido(int sd, struct protocolo_t *msg);
 void desbloquearContenido(int sd, struct protocolo_t *msg);
 void lookUpContent(int sd, struct protocolo_t *msg);
 int buscarPosicionPorSocket(int aux);
-
+void SendCliServerData(int sd, uint8_t userIdAssigned, prop_t propietario,
+		struct protocolo_t *msg);
+void guardarBuffer(struct protocolo_t *msg);
+void solicitarFile(int sd, struct protocolo_t *msg);
 
 //------------------------------------------------------------------------------
 // Conecta al servidor
 //------------------------------------------------------------------------------
 void conectar(int sd, struct protocolo_t *msg) {
 
-	msg->LEN=4;
-	msg->ID_USER= (uint8_t) sd;
-	msg->TYPE=1;
-	msg->MSG[0]='\0';
+	msg->LEN = 4;
+	msg->ID_USER = (uint8_t) sd;
+	msg->TYPE = 1;
+	msg->MSG[0] = '\0';
 
 	writeMsg(sd, msg);
 }
 
-void publicarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg)
-{
-	    //msg->LEN=14;
-	    msg->LEN=2;
-		msg->ID_USER=userIdAssigned;
-		msg->TYPE=2;
-		data_t data;
-		int i, act;
-		char opt = 's';
-        act = 1;
-        i=1;
-		while (act < 191 && (opt == 's' || opt =='S')){
-				printf("Ingrese Titulo\r\n");
-				scanf("%s", data.det.title);
-				data.det.lent =  strlen(data.det.title);
+void publicarContenido(int sd, uint8_t userIdAssigned, struct protocolo_t *msg) {
+	//msg->LEN=14;
+	msg->LEN = 2;
+	msg->ID_USER = userIdAssigned;
+	msg->TYPE = 2;
+	data_t data;
+	int i, act;
+	char opt = 's';
+	act = 1;
+	i = 1;
+	while (act < 191 && (opt == 's' || opt == 'S')) {
+		printf("Ingrese Titulo\r\n");
+		scanf("%s", data.det.title);
+		data.det.lent = strlen(data.det.title);
 
-				printf("Ingrese Autor\r\n");
-				scanf("%s", data.det.aut);
-				data.det.lena =  strlen(data.det.aut);
+		printf("Ingrese Autor\r\n");
+		scanf("%s", data.det.aut);
+		data.det.lena = strlen(data.det.aut);
 
-				printf("Ingrese Descripcion\r\n");
-				scanf("%s", data.det.desc);
-				scanf("%c",&opt); /* avance de línea */
-				data.det.lend =  strlen(data.det.desc);
+		printf("Ingrese Descripcion\r\n");
+		scanf("%s", data.det.desc);
+		scanf("%c", &opt); /* avance de línea */
+		data.det.lend = strlen(data.det.desc);
 
-				data.count = (uint8_t) i;
-				i++;
+		data.count = (uint8_t) i;
+		i++;
 
-				DataToBytes(act, data,msg);
+		DataToBytes(act, data, msg);
 
-				act += data.det.lent + data.det.lena +data.det.lend +3;
+		act += data.det.lent + data.det.lena + data.det.lend + 3;
 
-				msg->LEN += strlen(msg->MSG);
+		msg->LEN += strlen(msg->MSG);
 
-				printf("Ingresar otro contenido? s/n \r\n");
-				scanf("%c", &opt);
+		printf("Ingresar otro contenido? s/n \r\n");
+		scanf("%c", &opt);
 
-		}
+	}
 
-
-		writeMsg(sd, msg);
+	writeMsg(sd, msg);
 
 }
 
-void consultarContenido(int sd, uint8_t userIdAssigned,struct protocolo_t *msg)
-{
-	    msg->LEN=4;
-		msg->ID_USER=userIdAssigned;
-		msg->TYPE=3;
-		msg->MSG[0]='\0';
+void consultarContenido(int sd, uint8_t userIdAssigned, struct protocolo_t *msg) {
+	msg->LEN = 4;
+	msg->ID_USER = userIdAssigned;
+	msg->TYPE = 3;
+	msg->MSG[0] = '\0';
 
-		writeMsg(sd, msg);
+	writeMsg(sd, msg);
 }
 
-void consultarInformacionContenido(int sd,uint8_t id, uint8_t userIdAssigned,struct protocolo_t *msg)
-{
+void consultarInformacionContenido(int sd, uint8_t id, uint8_t userIdAssigned,
+		struct protocolo_t *msg) {
 
+	msg->LEN = 5;
+	msg->ID_USER = userIdAssigned;
+	msg->TYPE = 4;
+	msg->MSG[0] = id;
+	msg->MSG[1] = '\0';
 
-
-		msg->LEN= 5;
-		msg->ID_USER=userIdAssigned;
-		msg->TYPE=4;
-		msg->MSG[0]=id;
-		msg->MSG[1]='\0';
-
-		writeMsg(sd, msg);
+	writeMsg(sd, msg);
 }
 
-void desconectar(int sd, uint8_t userIdAssigned, struct protocolo_t *msg)
-{
-	    msg->LEN=4;
-	    msg->ID_USER=userIdAssigned;
-		msg->TYPE=5;
+void desconectar(int sd, uint8_t userIdAssigned, struct protocolo_t *msg) {
+	msg->LEN = 4;
+	msg->ID_USER = userIdAssigned;
+	msg->TYPE = 5;
 
-
-		writeMsg(sd, msg);
+	writeMsg(sd, msg);
 }
 
-void bloquearContenido(int sd, struct protocolo_t *msg)
-{
-	    msg->LEN=18;
-		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
-		msg->TYPE=6;
-		msg->MSG[0]='I';
-		msg->MSG[1]='d';
-		msg->MSG[2]='.';
-		msg->MSG[3]=' ';
-		msg->MSG[4]='C';
-		msg->MSG[5]='o';
-		msg->MSG[6]='n';
-		msg->MSG[7]='t';
-		msg->MSG[8]='e';
-		msg->MSG[9]='n';
-		msg->MSG[10]='i';
-		msg->MSG[11]='d';
-		msg->MSG[12]='o';
-		msg->MSG[13]='\0';
+void bloquearContenido(int sd, struct protocolo_t *msg) {
+	msg->LEN = 18;
+	msg->ID_USER = (uint16_t) ~((unsigned int) sd);
+	msg->TYPE = 6;
+	msg->MSG[0] = 'I';
+	msg->MSG[1] = 'd';
+	msg->MSG[2] = '.';
+	msg->MSG[3] = ' ';
+	msg->MSG[4] = 'C';
+	msg->MSG[5] = 'o';
+	msg->MSG[6] = 'n';
+	msg->MSG[7] = 't';
+	msg->MSG[8] = 'e';
+	msg->MSG[9] = 'n';
+	msg->MSG[10] = 'i';
+	msg->MSG[11] = 'd';
+	msg->MSG[12] = 'o';
+	msg->MSG[13] = '\0';
 
-		writeMsg(sd, msg);
+	writeMsg(sd, msg);
 }
 
-void desbloquearContenido(int sd, struct protocolo_t *msg)
-{
-	    msg->LEN=18;
-		msg->ID_USER=(uint16_t) ~((unsigned int) sd);
-		msg->TYPE=7;
-		msg->MSG[0]='I';
-		msg->MSG[1]='d';
-		msg->MSG[2]='.';
-		msg->MSG[3]=' ';
-		msg->MSG[4]='C';
-		msg->MSG[5]='o';
-		msg->MSG[6]='n';
-		msg->MSG[7]='t';
-		msg->MSG[8]='e';
-		msg->MSG[9]='n';
-		msg->MSG[10]='i';
-		msg->MSG[11]='d';
-		msg->MSG[12]='o';
-		msg->MSG[13]='\0';
+void desbloquearContenido(int sd, struct protocolo_t *msg) {
+	msg->LEN = 18;
+	msg->ID_USER = (uint16_t) ~((unsigned int) sd);
+	msg->TYPE = 7;
+	msg->MSG[0] = 'I';
+	msg->MSG[1] = 'd';
+	msg->MSG[2] = '.';
+	msg->MSG[3] = ' ';
+	msg->MSG[4] = 'C';
+	msg->MSG[5] = 'o';
+	msg->MSG[6] = 'n';
+	msg->MSG[7] = 't';
+	msg->MSG[8] = 'e';
+	msg->MSG[9] = 'n';
+	msg->MSG[10] = 'i';
+	msg->MSG[11] = 'd';
+	msg->MSG[12] = 'o';
+	msg->MSG[13] = '\0';
 
-		writeMsg(sd, msg);
+	writeMsg(sd, msg);
 }
 
 //------------------------------------------------------------------------------
 // Busca usuario por socket, si lo encuentra retorna posicion en el array, sino -1.
 //------------------------------------------------------------------------------
 int buscarPosicionPorSocket(int aux) {
-	int i, ret=-1;
+	int i, ret = -1;
 
-	for(i=0;i< MAX_CONNECTIONS;i++) {
-		if(usersArray[i].socketNumber == aux) {
+	for (i = 0; i < MAX_CONNECTIONS; i++) {
+		if (usersArray[i].socketNumber == aux) {
 			ret = i;
 			break;
 		}
@@ -163,29 +157,91 @@ int buscarPosicionPorSocket(int aux) {
 	return ret;
 }
 
-void lookUpContent(int sd, struct protocolo_t *msg)
-{
+void lookUpContent(int sd, struct protocolo_t *msg) {
 	/*
-	FILE * fp;
-	char * line = NULL;
-	size_t len = 0;
-	ssize_t read;
+	 FILE * fp;
+	 char * line = NULL;
+	 size_t len = 0;
+	 ssize_t read;
 
-	fp = fopen("/home/joaquin/tmp/test.txt", "r");
-	while ((read = getline(&line, &len, fp)) != -1) {
-		printf("Retrieved line of length %zu :\n", read);
-		printf("%s", line);
-	}
+	 fp = fopen("/home/mxorla/workspace/IWTP-Client/config", "r");
+	 while ((read = getline(&line, &len, fp)) != -1) {
+	 printf("Retrieved line of length %zu :\n", read);
+	 printf("%s", line);
+	 }
 
-	fclose(fp);
-	if (line) {
-		free(line);
-	}
-	*/
+	 fclose(fp);
+	 if (line) {
+	 free(line);
+	 }
+	 */
+
+	FILE *fileptr;
+	char *buffer;
+	long filelen;
+
+	fileptr = fopen("/home/mxorla/workspace/IWTP-Client/BOCA.mp4", "rb");  // Open the file in binary mode
+	fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
+	filelen = ftell(fileptr);             // Get the current byte offset in the file
+	rewind(fileptr);                      // Jump back to the beginning of the file
+
+	buffer = (char *)malloc((filelen+1)*sizeof(char)); // Enough memory for file + \0
+	fread(buffer, filelen, 1, fileptr); // Read in the entire file
+	fclose(fileptr); // Close the file
+
 	//TODO hacer streaming de archivo
+	printf("SEEEEE");
+	msg->LEN = 5;
+			msg->ID_USER = 1;//TODO:
+			msg->TYPE = 2;
+
+			msg->MSG[0] = 'I';
+			msg->MSG[1] = '\0';
+
+
 	writeMsg(sd, msg);
 
 }
 
+void SendCliServerData(int sd, uint8_t userIdAssigned, prop_t propietario,
+		struct protocolo_t *msg) {
 
+	msg->LEN = 5;
+	msg->ID_USER = userIdAssigned;
+	msg->TYPE = 99;
 
+	uint8_t lowPort = propietario.puerto & 0xff;
+	uint8_t highPort = (propietario.puerto >> 8);
+
+	msg->MSG[0] = lowPort;
+	msg->MSG[1] = highPort;
+
+	msg->MSG[3] = '\0';
+
+	writeMsg(sd, msg);
+}
+
+void guardarBuffer(struct protocolo_t *msg) {
+	int i;
+	char buffer[MSG_LEN - 2];
+	uint8_t sec = msg->MSG[0];
+	if (sec != -1) {
+		uint8_t len = msg->MSG[1];
+		for (i = 0; i < len; i++) {
+			buffer[0] = msg->MSG[i];
+		}
+	}
+}
+
+void solicitarFile(int sd, struct protocolo_t *msg) {
+
+	    msg->LEN = 5;
+		msg->ID_USER = 1;//TODO:
+		msg->TYPE = 1;
+
+		msg->MSG[0] = 'Y';
+		msg->MSG[1] = '\0';
+
+		writeMsg(sd, msg);
+
+}

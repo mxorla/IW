@@ -72,3 +72,4 @@ content_t BytesToData(int *act, struct protocolo_t *msg);
 content_t BytesToDataIp(struct protocolo_t *msg);
 void DataToBytes(int act, data_t data, struct protocolo_t *msg);
 
+

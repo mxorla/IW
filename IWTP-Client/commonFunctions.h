@@ -68,7 +68,7 @@ int writeMsg(int sd, struct protocolo_t *msg) {
 	memcpy(&txBuf[totalLen], &msg->MSG, msgLen);
 	totalLen+=msgLen;
 	txBuf[0] = totalLen;	//Escribe longitud en el buffer
-	txBuf[totalLen + 1] = '\0';									//Escribe fin
+	txBuf[totalLen] = '\0';									//Escribe fin
 
 	return send(sd, txBuf, totalLen, 0);
 }
@@ -165,4 +165,7 @@ void DataToBytes(int act, data_t data, struct protocolo_t *msg) {
 
 	memcpy(msg->MSG, dataMessage, act);
 }
+
+
+
 
