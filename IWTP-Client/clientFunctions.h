@@ -158,47 +158,59 @@ int buscarPosicionPorSocket(int aux) {
 }
 
 void lookUpContent(int sd, struct protocolo_t *msg) {
-	/*
-	 FILE * fp;
-	 char * line = NULL;
-	 size_t len = 0;
-	 ssize_t read;
 
-	 fp = fopen("/home/mxorla/workspace/IWTP-Client/config", "r");
-	 while ((read = getline(&line, &len, fp)) != -1) {
-	 printf("Retrieved line of length %zu :\n", read);
-	 printf("%s", line);
-	 }
-
-	 fclose(fp);
-	 if (line) {
-	 free(line);
-	 }
-	 */
-
-	FILE *fileptr;
-	char *buffer;
+/*	FILE * fp;
+	char * line = NULL;
+	size_t len = 0;
+	ssize_t read;
 	long filelen;
+	int i = 0;
 
-	fileptr = fopen("/home/mxorla/workspace/IWTP-Client/BOCA.mp4", "rb");  // Open the file in binary mode
-	fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
-	filelen = ftell(fileptr);             // Get the current byte offset in the file
-	rewind(fileptr);                      // Jump back to the beginning of the file
+	fp = fopen("/home/mxorla/workspace/IWTP-Client/BOCA.mp4", "rb");
 
-	buffer = (char *)malloc((filelen+1)*sizeof(char)); // Enough memory for file + \0
-	fread(buffer, filelen, 1, fileptr); // Read in the entire file
-	fclose(fileptr); // Close the file
+	char destBuffer[1000];
+	while ((read = getline(&line, &len, fp)) != -1) {
+		printf("Retrieved line of length %zu :\n", read);
+		printf("%s", line);
+		destBuffer[i] = line;
+		i++;
+	}
+
+	fclose(fp);
+	if (line) {
+		free(line);
+	}
+*/
+	int j;
+
+	 FILE *fileptr;
+	 char *buffer;
+	 long filelen;
+
+	 fileptr = fopen("/home/mxorla/workspace/IWTP-Client/test", "rb");  // Open the file in binary mode
+	 fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
+	 filelen = ftell(fileptr);             // Get the current byte offset in the file
+	 rewind(fileptr);                      // Jump back to the beginning of the file
+
+	 buffer = (char *)malloc((filelen+1)*sizeof(char)); // Enough memory for file + \0
+
+	 fread(buffer, filelen, 1, fileptr); // Read in the entire file
+	 fclose(fileptr); // Close the file
+
+	 char destBuffer[1000];
+	 for (j = 0; j < sizeof(destBuffer); j++)
+		 destBuffer[j] = 0x00;
+
+	 memcpy(destBuffer, buffer,strlen(buffer));
 
 	//TODO hacer streaming de archivo
-	printf("SEEEEE");
-	msg->LEN = 5;
-			msg->ID_USER = 1;//TODO:
-			msg->TYPE = 2;
 
-			msg->MSG[0] = 'I';
-			msg->MSG[1] = '\0';
+	msg->LEN = strlen(destBuffer);
+	msg->ID_USER = 1;
+	msg->TYPE = 2;
 
-
+	memcpy(msg->MSG, destBuffer,strlen(destBuffer));
+	msg->MSG[strlen(destBuffer)] = '\0';
 	writeMsg(sd, msg);
 
 }
@@ -222,26 +234,30 @@ void SendCliServerData(int sd, uint8_t userIdAssigned, prop_t propietario,
 }
 
 void guardarBuffer(struct protocolo_t *msg) {
-	int i;
+	/*int i;
 	char buffer[MSG_LEN - 2];
-	uint8_t sec = msg->MSG[0];
+	uint8_t sec = msg->ID_USER;
 	if (sec != -1) {
-		uint8_t len = msg->MSG[1];
+		uint8_t len = msg->LEN;
 		for (i = 0; i < len; i++) {
-			buffer[0] = msg->MSG[i];
+			buffer[i] = msg->MSG[i];
 		}
 	}
+*/
+	FILE *f = fopen("/home/mxorla/workspace/IWTP-Client/clientdata.txt", "wb");
+	fwrite(msg->MSG, sizeof(char), strlen(msg->MSG), f);
+	fclose(f);
 }
 
 void solicitarFile(int sd, struct protocolo_t *msg) {
 
-	    msg->LEN = 5;
-		msg->ID_USER = 1;//TODO:
-		msg->TYPE = 1;
+	msg->LEN = 5;
+	msg->ID_USER = 1; //TODO:
+	msg->TYPE = 1;
 
-		msg->MSG[0] = 'Y';
-		msg->MSG[1] = '\0';
+	msg->MSG[0] = 'Y';
+	msg->MSG[1] = '\0';
 
-		writeMsg(sd, msg);
+	writeMsg(sd, msg);
 
 }

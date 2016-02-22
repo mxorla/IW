@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 	childPID = fork();
 
 	if (childPID >= 0) {	// fork was successful
-		if (childPID == 0) {	// Parent process- client
+		if (childPID != 0) {	// Parent process- client
 			if (argc < 2) {
 				printf(
 						"Debe configurar el parametro correspondiente a la IP del servidor\n",
@@ -275,6 +275,17 @@ int main(int argc, char *argv[]) {
 									printf("Look up content");
 									lookUpContent(sdc, msg);
 								}
+								if (msg->TYPE == 2) {
+
+									guardarBuffer(msg);
+									FD_CLR(sdc, &conjunto); //Borra descriptor del set
+									for (nro = 0; nro < 8; nro++) {
+										close(nro + 4);
+									}
+									close(sd);
+									//	_exit(EXIT_SUCCESS);
+
+								}
 							}
 							//Se cerro el socket
 							else {
@@ -323,7 +334,7 @@ void *checkConnectionsClientServer(void *data) {
 
 			case 2: {
 				printf("Iniciando Streaming \r\n");
-				guardarBuffer(msg);
+
 			}
 				break;
 			default: {
