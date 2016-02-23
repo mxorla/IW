@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 	childPID = fork();
 
 	if (childPID >= 0) {	// fork was successful
-		if (childPID != 0) {	// Parent process- client
+		if (childPID == 0) {	// Parent process- client
 			if (argc < 2) {
 				printf(
 						"Debe configurar el parametro correspondiente a la IP del servidor\n",
@@ -313,43 +313,9 @@ int main(int argc, char *argv[]) {
 	close(sd);
 }
 
-void *checkConnectionsClientServer(void *data) {
-	int interval = *(int *) data;
-	int nro;
-	content_t de;
-	while (1) {
-		if (readMsg(Clisd, msg) > 0) {
-
-			//nro=0;
-
-			switch (msg->TYPE) {
-
-			case 2: {
-				printf("Iniciando Streaming \r\n");
-
-			}
-				break;
-			default: {
-				userIdAssigned = msg->ID_USER;
-				printf(
-						"Ya esta conectado con el clienteservidor, su id de usuario es %d  \r\n",
-						msg->ID_USER);
-				if (msg->LEN != 0) {
-					printf("El Servidor Respondio --->   %s\n", msg->MSG);
-					printf("Iniciando Conect Streaming \r\n");
-				}
-				solicitarFile(Clisd, msg);
-			}
-			}
-
-		}
-		usleep(interval);
-	}
-}
-
 void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 
-	int interval = 30;
+	int i, act = 1, interval = 30;
 
 	Clisd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	Cliservidor.sin_family = AF_INET;
@@ -365,10 +331,23 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 		exit(-1);
 	}
 
+	uint8_t posTitle = msg->MSG[1] + 4;
+	uint8_t longTitle = msg->MSG[posTitle];
+	posTitle++;
+	act=posTitle;
+	char bufferTitle[50];
+	msg->MSG[0]= longTitle;
+	bufferTitle[0] = longTitle;
+	for (i = 0; i < longTitle ; i++) {
+		bufferTitle[i+1] = msg->MSG[act];
+		act++;
+	}
+	bufferTitle[longTitle + 1] ='\0';
+
 	msg = (struct protocolo_t *) txBuf;
 
 	//pthread_create(&Clithread, NULL, checkConnectionsClientServer, &interval);
- int ok = 1;
+	int ok = 1;
 	while (ok) {
 		if (readMsg(Clisd, msg) > 0) {
 
@@ -378,7 +357,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				printf("Iniciando Streaming \r\n");
 				guardarBuffer(msg);
 				close(Clisd);
-				ok=0;
+				ok = 0;
 
 			}
 				break;
@@ -391,7 +370,9 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 					printf("El Servidor Respondio --->   %s\n", msg->MSG);
 					printf("Iniciando Conect Streaming \r\n");
 				}
+				memcpy(msg->MSG,bufferTitle,strlen(bufferTitle)+1);
 				solicitarFile(Clisd, msg);
+
 			}
 			}
 
