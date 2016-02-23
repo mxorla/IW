@@ -64,6 +64,7 @@ typedef struct {
 users_t usersArray[MAX_CONNECTIONS];
 content_t contentsArray[MAX_CONTENTS];
 int currentPosition=0;
+char* PathFolder;
 
 //FUNCTIONS PROTOTYPES
 int readMsg(int sd, struct protocolo_t *msg);

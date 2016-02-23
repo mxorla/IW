@@ -170,7 +170,6 @@ void lookUpContent(int sd, struct protocolo_t *msg) {
 	}
 
 	char* folder = "/home/mxorla/workspace/IWTP-Client/";
-
 	char * path = (char *) malloc(1 + strlen(folder) + strlen(title));
 	strcpy(path, folder);
 	strcat(path, title);
@@ -251,21 +250,21 @@ void guardarBuffer(struct protocolo_t *msg) {
 	 */
 	int i;
 	uint8_t lenTitle = msg->MSG[0];
-		char title[50];
+	char title[50];
 
-		for (i = 0; i < lenTitle; i++) {
-			title[i] = msg->MSG[i + 1];
+	for (i = 0; i < lenTitle; i++) {
+		title[i] = msg->MSG[i + 1];
 
-		}
+	}
 
-		char* folder = "/home/mxorla/workspace/IWTP-Client/";
-
-		char * path = (char *) malloc(1 + strlen(folder) + strlen(title));
-		strcpy(path, folder);
-		strcat(path, title);
+	char* folder = "/home/mxorla/workspace/IWTP-Client/";
+	char * path = (char *) malloc(1 + strlen(folder) + strlen(title));
+	strcpy(path, folder);
+	strcat(path, title);
 
 	FILE *f = fopen(path, "wb");
-	fwrite(msg->MSG + lenTitle +2, sizeof(char), strlen(msg->MSG)-lenTitle-2, f);
+	fwrite(msg->MSG + lenTitle + 2, sizeof(char),
+			strlen(msg->MSG) - lenTitle - 2, f);
 	fclose(f);
 }
 

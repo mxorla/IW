@@ -6,6 +6,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <unistd.h>
 
 int sd;
 int sd2;
@@ -21,8 +22,10 @@ int Clilon;
 struct hostent * Clih;
 pthread_t Clithread;
 
+char *getcwd(char *buf, size_t size);
+
 void printMenu() {
-    //system("clear");
+	//system("clear");
 	printf("Menu\n");
 
 	printf("1 -		Publicar Contenido\n");
@@ -331,15 +334,15 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 	uint8_t posTitle = msg->MSG[1] + 4;
 	uint8_t longTitle = msg->MSG[posTitle];
 	posTitle++;
-	act=posTitle;
+	act = posTitle;
 	char bufferTitle[50];
-	msg->MSG[0]= longTitle;
+	msg->MSG[0] = longTitle;
 	bufferTitle[0] = longTitle;
-	for (i = 0; i < longTitle ; i++) {
-		bufferTitle[i+1] = msg->MSG[act];
+	for (i = 0; i < longTitle; i++) {
+		bufferTitle[i + 1] = msg->MSG[act];
 		act++;
 	}
-	bufferTitle[longTitle + 1] ='\0';
+	bufferTitle[longTitle + 1] = '\0';
 
 	msg = (struct protocolo_t *) txBuf;
 
@@ -368,7 +371,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 					printf("El Servidor Respondio --->   %s\n", msg->MSG);
 					printf("Iniciando Conect Streaming \r\n");
 				}
-				memcpy(msg->MSG,bufferTitle,strlen(bufferTitle)+1);
+				memcpy(msg->MSG, bufferTitle, strlen(bufferTitle) + 1);
 				solicitarFile(Clisd, msg);
 
 			}
@@ -390,7 +393,23 @@ void loadConfiguration() {
 	char * line = NULL;
 	size_t len = 0;
 	ssize_t read;
-	fp = fopen("/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/config", "r");
+	char cwd[1024];
+	/*getcwd(cwd, sizeof(cwd));
+	PathFolder = cwd;
+
+	char* title = "config";
+
+	PathFolder = (char *) malloc(1 + strlen(cwd) +1);
+	strcpy(PathFolder, cwd);
+	strcat(PathFolder, "/");
+
+	strcpy(PathFolder,  "/home/mxorla/workspace/IWTP-Client/");
+
+	char* path = (char *) malloc(1 + strlen(PathFolder) + strlen(title));
+	strcpy(path, PathFolder);
+	strcat(path, title);
+	fp = fopen(path, "r");*/
+	fp = fopen("/home/mxorla/workspace/IWTP-Client/config", "r");
 	while ((read = getline(&line, &len, fp)) != -1) {
 
 		CliServer.puerto = (uint16_t) line;
