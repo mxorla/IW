@@ -20,7 +20,7 @@ prop_t CliServer;
 struct sockaddr_in Cliservidor;
 int Clilon;
 struct hostent * Clih;
-pthread_t Clithread;
+pthread_t runReprothread;
 
 char *getcwd(char *buf, size_t size);
 
@@ -214,94 +214,69 @@ int main(int argc, char *argv[]) {
 				}
 
 			}
-		} else { //Child process  - Server
-			printf("Este es otro proceso, para el server\n");
+		} else {
+			int listenfd = 0;
+			int connfd = 0;
+			struct sockaddr_in serv_addr;
+			char sendBuff[1025];
+			int numrv;
 
-			printf("Servidor\r\n");
+			listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
-			servidor.sin_family = AF_INET;
-			servidor.sin_port = htons(CliServer.puerto);
-			//		servidor.sin_port = htons(4455);
-			servidor.sin_addr.s_addr = INADDR_ANY;
+			printf("Socket retrieve success in %s:%d\n", CliServer.ip,
+					CliServer.puerto);
 
-			sd2 = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+			memset(&serv_addr, '0', sizeof(serv_addr));
+			memset(sendBuff, '0', sizeof(sendBuff));
 
-			if (bind(sd2, (struct sockaddr *) &servidor, sizeof(servidor))
-					< 0) {
-				perror("Error en bind");
-				exit(-1);
+			serv_addr.sin_family = AF_INET;
+			serv_addr.sin_addr.s_addr = inet_addr(CliServer.ip);
+			serv_addr.sin_port = htons(CliServer.puerto);
+
+			bind(listenfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr));
+
+			if (listen(listenfd, 10) == -1) {
+				printf("Failed to listen\n");
+				return -1;
 			}
 
-			const int optVal = 0;
-			const socklen_t optLen = sizeof(optVal);
-
-			setsockopt(sd2, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
-
-			listen(sd2, 5);
-
-			FD_ZERO(&conjunto);
-			FD_SET(sd2, &conjunto);
-			msg = (struct protocolo_t *) buffer;
 			while (1) {
-				copia = conjunto;
-				select(FD_SETSIZE, &copia, NULL, NULL, NULL);
+				connfd = accept(listenfd, (struct sockaddr*) NULL, NULL);
 
-				if (FD_ISSET(sd2, &copia)) { // Recibe un cliente que se quiere conectar
-					lon = sizeof(cliente);
-					sdc = accept(sd2, (struct sockaddr *) &cliente, &lon);
-					FD_SET(sdc, &conjunto);
-					//Responde q esta conectado
-					msg->LEN = 14;
-					msg->ID_USER = (uint8_t) sdc;
-					msg->TYPE = 8;
-					msg->MSG[0] = 'C';
-					msg->MSG[1] = 'o';
-					msg->MSG[2] = 'n';
-					msg->MSG[3] = 'e';
-					msg->MSG[4] = 'c';
-					msg->MSG[5] = 't';
-					msg->MSG[6] = 'a';
-					msg->MSG[7] = 'd';
-					msg->MSG[8] = 'o';
-					msg->MSG[9] = '\0';
-
-					writeMsg(sdc, msg);
-				} else {
-
-					for (sdc = 1; sdc < FD_SETSIZE; sdc++) {
-						if (FD_ISSET(sdc, &copia) && (sdc != sd2)) {
-							msg = (struct protocolo_t *) buffer;
-							if ((n = readMsg(sdc, msg)) > 0) {
-								if (msg->TYPE == 1) {
-
-									printf("Look up content");
-									lookUpContent(sdc, msg);
-								}
-
-							}
-							//Se cerro el socket
-							else {
-								//Cierra el socket cerrado en el otro extremo para que pueda ser reutilizado
-								close(sdc);
-								//Dado socket (sdc) obtiene numero
-								nro = buscarPosicionPorSocket(sdc);
-								//Lo marca como cerrado
-								usersArray[nro].socketNumber = 0; // se le pone 0 porq al iniciarse el array arranca con 0 y se usa esa comparacion, antes era -1;
-								//Borra descriptor del set
-								FD_CLR(sdc, &conjunto);
-
-								printf("El usuario se desconecto\n");
-
-							}
-						}
-					}
+				FILE *fp = fopen(
+						"/home/mxorla/workspace/IWTP-Client/Shared/boca2.3gp",
+						"rb");
+				if (fp == NULL) {
+					printf("File opern error");
+					return 1;
 				}
+
+				while (1) {
+
+					/*  256 bytes */
+					unsigned char buff[256] = { 0 };
+					int nread = fread(buff, 1, 256, fp);
+					printf("Bytes leidos %d \n", nread);
+
+					if (nread > 0) {
+						printf("Enviando \n");
+						write(connfd, buff, nread);
+					}
+
+					if (nread < 256) {
+						if (feof(fp))
+							printf("End of file\n");
+						if (ferror(fp))
+							printf("Error reading\n");
+						break;
+					}
+
+				}
+
+				close(connfd);
+				sleep(1);
 			}
-			FD_CLR(sdc, &conjunto); //Borra descriptor del set
-			for (nro = 0; nro < 8; nro++) {
-				close(nro + 4);
-			}
-			close(sd2);
+
 			return 0;
 		}
 
@@ -313,78 +288,59 @@ int main(int argc, char *argv[]) {
 	close(sd);
 }
 
+void *runRepro(void *data) {
+	int interval = *(int *) data;
+	usleep(interval);
+	system("mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/Shared/Recibidos/sample_file.3gp");
+}
+
 void iniciarStreaming(content_t de, struct protocolo_t *msg) {
+	int sockfd = 0;
+	int bytesReceived = 0;
+	int interval = 30;
+	char recvBuff[256];
+	memset(recvBuff, '0', sizeof(recvBuff));
+	struct sockaddr_in serv_addr;
 
-	int i, act = 1, interval = 30;
-
-	Clisd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	Cliservidor.sin_family = AF_INET;
-	Cliservidor.sin_port = htons(de.propietario.puerto);
-
-	if (Clih = gethostbyname(de.propietario.ip)) {
-		memcpy(&Cliservidor.sin_addr, Clih->h_addr, Clih->h_length);
-	}
-
-	Clilon = sizeof(Cliservidor);
-	if (connect(Clisd, (struct sockaddr *) &Cliservidor, Clilon) < 0) {
-		perror("Error en connect");
+	if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("\n Error : Could not create socket \n");
 		exit(-1);
 	}
 
-	uint8_t posTitle = msg->MSG[1] + 4;
-	uint8_t longTitle = msg->MSG[posTitle];
-	posTitle++;
-	act = posTitle;
-	char bufferTitle[50];
-	msg->MSG[0] = longTitle;
-	bufferTitle[0] = longTitle;
-	for (i = 0; i < longTitle; i++) {
-		bufferTitle[i + 1] = msg->MSG[act];
-		act++;
+	serv_addr.sin_family = AF_INET;
+	serv_addr.sin_port = htons(de.propietario.puerto); // port
+	serv_addr.sin_addr.s_addr = inet_addr(de.propietario.ip);
+
+	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr))
+			< 0) {
+		perror("\n Error : Connect Failed \n");
+		exit(-1);
 	}
-	bufferTitle[longTitle + 1] = '\0';
 
-	msg = (struct protocolo_t *) txBuf;
+	FILE *fp;
+	fp =
+			fopen(
+					"/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/sample_file.3gp",
+					"ab");
+	if (NULL == fp) {
+		perror("Error opening file");
+		exit(-1);
+	}
 
-	//pthread_create(&Clithread, NULL, checkConnectionsClientServer, &interval);
-	int ok = 1;
-	while (ok) {
-		if (readMsg(Clisd, msg) > 0) {
+	pthread_create(&runReprothread, NULL, runRepro, &interval);
+	/*  256 bytes */
+	while ((bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
+		printf("Bytes recibidos %d\n", bytesReceived);
 
-			switch (msg->TYPE) {
-
-			case 2: {
-				printf("Iniciando Streaming \r\n");
-				guardarBuffer(msg);
-				system("mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/BOCA.mp4");
-				close(Clisd);
-				ok = 0;
-
-			}
-				break;
-			default: {
-				userIdAssigned = msg->ID_USER;
-				printf(
-						"Ya esta conectado con el clienteservidor, su id de usuario es %d  \r\n",
-						msg->ID_USER);
-				if (msg->LEN != 0) {
-					printf("El Servidor Respondio --->   %s\n", msg->MSG);
-					printf("Iniciando Conect Streaming \r\n");
-				}
-				memcpy(msg->MSG, bufferTitle, strlen(bufferTitle) + 1);
-				solicitarFile(Clisd, msg);
-
-			}
-			}
-
-		}
+		fwrite(recvBuff, 1, bytesReceived, fp);
 
 	}
 
-	//while (1) {
+	if (bytesReceived < 0) {
+		printf("\n Read Error \n");
+	}
 
-//	}
-	close(Clisd);
+	exit(0);
 }
 
 void loadConfiguration() {
@@ -395,24 +351,28 @@ void loadConfiguration() {
 	ssize_t read;
 	char cwd[1024];
 	/*getcwd(cwd, sizeof(cwd));
-	PathFolder = cwd;
+	 PathFolder = cwd;
 
-	char* title = "config";
+	 char* title = "config";
 
-	PathFolder = (char *) malloc(1 + strlen(cwd) +1);
-	strcpy(PathFolder, cwd);
-	strcat(PathFolder, "/");
+	 PathFolder = (char *) malloc(1 + strlen(cwd) +1);
+	 strcpy(PathFolder, cwd);
+	 strcat(PathFolder, "/");
 
-	strcpy(PathFolder,  "/home/mxorla/workspace/IWTP-Client/");
+	 strcpy(PathFolder,  "/home/mxorla/workspace/IWTP-Client/");
 
-	char* path = (char *) malloc(1 + strlen(PathFolder) + strlen(title));
-	strcpy(path, PathFolder);
-	strcat(path, title);
-	fp = fopen(path, "r");*/
+	 char* path = (char *) malloc(1 + strlen(PathFolder) + strlen(title));
+	 strcpy(path, PathFolder);
+	 strcat(path, title);
+	 fp = fopen(path, "r");*/
 	fp = fopen("/home/mxorla/workspace/IWTP-Client/config", "r");
 	while ((read = getline(&line, &len, fp)) != -1) {
 
-		CliServer.puerto = (uint16_t) line;
+		if (strlen(line) > 6) {
+			memcpy(CliServer.ip, line, strlen(line) - 1);
+		} else {
+			CliServer.puerto = (uint16_t) line;
+		}
 	}
 
 	fclose(fp);
