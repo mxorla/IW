@@ -22,7 +22,7 @@ struct hostent * Clih;
 pthread_t Clithread;
 
 void printMenu() {
-//TODO:	system("clear");
+    //system("clear");
 	printf("Menu\n");
 
 	printf("1 -		Publicar Contenido\n");
@@ -64,8 +64,8 @@ void *checkConnections(void *data) {
 
 				}
 				printf("> \r");
-				break;
 			}
+				break;
 			case 2: {
 			}
 				break;
@@ -186,8 +186,6 @@ int main(int argc, char *argv[]) {
 
 					printf("> \r");
 					scanf("%d", &opcion); //Leyendo opcion
-					scanf("%d", &opcion); //Leyendo opcion
-
 				}
 					break;
 				case 3: {
@@ -196,7 +194,6 @@ int main(int argc, char *argv[]) {
 					scanf("%d", &id);
 					consultarInformacionContenido(sd, id, userIdAssigned, msg);
 					printf("> \r");
-					scanf("%d", &opcion); //Leyendo opcion
 					scanf("%d", &opcion); //Leyendo opcion
 					break;
 				}
@@ -411,7 +408,7 @@ void loadConfiguration() {
 	char * line = NULL;
 	size_t len = 0;
 	ssize_t read;
-	fp = fopen("/home/mxorla/workspace/IWTP-Client/config", "r");
+	fp = fopen("/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/config", "r");
 	while ((read = getline(&line, &len, fp)) != -1) {
 
 		CliServer.puerto = (uint16_t) line;
