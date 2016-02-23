@@ -2,7 +2,6 @@
 void agregarUsuario(struct sockaddr_in client, int socket);
 int buscarGrupoUsuario(int aux);
 int buscarPosicionUsuario(int aux);
-int buscarPosicionPorSocket(int aux);
 void publicarContenido(struct protocolo_t *msg);
 void consultarContenido(int sd, struct protocolo_t *msg);
 void consultarInformacionContenido(int sd, struct protocolo_t *msg);
@@ -10,6 +9,7 @@ int getPosContentArray();
 users_t getUserById(uint8_t userId);
 void guardarCliServer(struct sockaddr_in client, int socket,
 		struct protocolo_t *msg);
+void deleteContentArray(uint8_t id);
 
 //------------------------------------------------------------------------------
 // Si el usuario no esta en el array lo agrega.
@@ -57,21 +57,6 @@ int buscarPosicionUsuario(int aux) {
 
 	for (i = 0; i < MAX_CONNECTIONS; i++) {
 		if (usersArray[i].idUsuario == aux) {
-			ret = i;
-			break;
-		}
-	}
-	return ret;
-}
-
-//------------------------------------------------------------------------------
-// Busca usuario por socket, si lo encuentra retorna posicion en el array, sino -1.
-//------------------------------------------------------------------------------
-int buscarPosicionPorSocket(int aux) {
-	int i, ret = -1;
-
-	for (i = 0; i < MAX_CONNECTIONS; i++) {
-		if (usersArray[i].socketNumber == aux) {
 			ret = i;
 			break;
 		}
@@ -148,6 +133,15 @@ int getPosContentArray() {
 	return ret;
 }
 
+void deleteContentArray(uint8_t id) {
+	int i, ret = -1;
+	for (i = 0; i < MAX_CONTENTS; i++) {
+		if (contentsArray[i].propietario.id == id) {
+			contentsArray[i].propietario.id = 0;
+		}
+	}
+}
+
 void consultarContenido(int sd, struct protocolo_t *msg) {
 
 	int i, j, cant = 0, act;
@@ -158,7 +152,7 @@ void consultarContenido(int sd, struct protocolo_t *msg) {
 	act = 1;
 	for (j = 0; j < MAX_CONTENTS; j++) {
 		if (contentsArray[j].propietario.id == 0) {
-			break;
+			continue;
 		}
 		cant++;
 
