@@ -8,7 +8,7 @@
 #include <ctype.h>
 
 int sd;
-int sd;
+int sd2;
 int Clisd;
 struct protocolo_t *msg;
 char txBuf[P_SIZE];
@@ -82,6 +82,7 @@ void *checkConnections(void *data) {
 				printf("> \r");
 
 				iniciarStreaming(de, msg);
+				printMenu();
 
 			}
 				break;
@@ -223,9 +224,10 @@ int main(int argc, char *argv[]) {
 			//		servidor.sin_port = htons(4455);
 			servidor.sin_addr.s_addr = INADDR_ANY;
 
-			sd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+			sd2 = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-			if (bind(sd, (struct sockaddr *) &servidor, sizeof(servidor)) < 0) {
+			if (bind(sd2, (struct sockaddr *) &servidor, sizeof(servidor))
+					< 0) {
 				perror("Error en bind");
 				exit(-1);
 			}
@@ -233,20 +235,20 @@ int main(int argc, char *argv[]) {
 			const int optVal = 0;
 			const socklen_t optLen = sizeof(optVal);
 
-			setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
+			setsockopt(sd2, SOL_SOCKET, SO_REUSEADDR, (void*) &optVal, optLen);
 
-			listen(sd, 5);
+			listen(sd2, 5);
 
 			FD_ZERO(&conjunto);
-			FD_SET(sd, &conjunto);
+			FD_SET(sd2, &conjunto);
 			msg = (struct protocolo_t *) buffer;
 			while (1) {
 				copia = conjunto;
 				select(FD_SETSIZE, &copia, NULL, NULL, NULL);
 
-				if (FD_ISSET(sd, &copia)) { // Recibe un cliente que se quiere conectar
+				if (FD_ISSET(sd2, &copia)) { // Recibe un cliente que se quiere conectar
 					lon = sizeof(cliente);
-					sdc = accept(sd, (struct sockaddr *) &cliente, &lon);
+					sdc = accept(sd2, (struct sockaddr *) &cliente, &lon);
 					FD_SET(sdc, &conjunto);
 					//Responde q esta conectado
 					msg->LEN = 14;
@@ -267,7 +269,7 @@ int main(int argc, char *argv[]) {
 				} else {
 
 					for (sdc = 1; sdc < FD_SETSIZE; sdc++) {
-						if (FD_ISSET(sdc, &copia) && (sdc != sd)) {
+						if (FD_ISSET(sdc, &copia) && (sdc != sd2)) {
 							msg = (struct protocolo_t *) buffer;
 							if ((n = readMsg(sdc, msg)) > 0) {
 								if (msg->TYPE == 1) {
@@ -275,17 +277,7 @@ int main(int argc, char *argv[]) {
 									printf("Look up content");
 									lookUpContent(sdc, msg);
 								}
-								if (msg->TYPE == 2) {
 
-									guardarBuffer(msg);
-									FD_CLR(sdc, &conjunto); //Borra descriptor del set
-									for (nro = 0; nro < 8; nro++) {
-										close(nro + 4);
-									}
-									close(sd);
-									//	_exit(EXIT_SUCCESS);
-
-								}
 							}
 							//Se cerro el socket
 							else {
@@ -309,7 +301,7 @@ int main(int argc, char *argv[]) {
 			for (nro = 0; nro < 8; nro++) {
 				close(nro + 4);
 			}
-			close(sd);
+			close(sd2);
 			return 0;
 		}
 
@@ -375,11 +367,41 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 
 	msg = (struct protocolo_t *) txBuf;
 
-	pthread_create(&Clithread, NULL, checkConnectionsClientServer, &interval);
+	//pthread_create(&Clithread, NULL, checkConnectionsClientServer, &interval);
+ int ok = 1;
+	while (ok) {
+		if (readMsg(Clisd, msg) > 0) {
 
-	while (1) {
+			switch (msg->TYPE) {
+
+			case 2: {
+				printf("Iniciando Streaming \r\n");
+				guardarBuffer(msg);
+				close(Clisd);
+				ok=0;
+
+			}
+				break;
+			default: {
+				userIdAssigned = msg->ID_USER;
+				printf(
+						"Ya esta conectado con el clienteservidor, su id de usuario es %d  \r\n",
+						msg->ID_USER);
+				if (msg->LEN != 0) {
+					printf("El Servidor Respondio --->   %s\n", msg->MSG);
+					printf("Iniciando Conect Streaming \r\n");
+				}
+				solicitarFile(Clisd, msg);
+			}
+			}
+
+		}
 
 	}
+
+	//while (1) {
+
+//	}
 	close(Clisd);
 }
 
