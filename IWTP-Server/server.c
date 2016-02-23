@@ -98,9 +98,14 @@ int main(void) {
 							printf("Desconectar\n");
 							close(sdc);
 							//Dado socket (sdc) obtiene numero
-							nro = buscarPosicionPorSocket(sdc);
+							nro = buscarPosicionUsuario(sdc);
 							//Lo marca como cerrado
 							usersArray[nro].socketNumber = 0; // se le pone 0 porq al iniciarse el array arranca con 0 y se usa esa comparacion, antes era -1;
+							usersArray[nro].idUsuario = 0;
+							usersArray[nro].address.puerto = 0;
+
+							//Borra los contenidos
+							deleteContentArray(sdc);
 							//Borra descriptor del set
 							FD_CLR(sdc, &conjunto);
 
@@ -109,7 +114,7 @@ int main(void) {
 						}
 						case 99: {
 
-							guardarCliServer(cliente,sdc,msg);
+							guardarCliServer(cliente, sdc, msg);
 							break;
 						}
 						default:
@@ -127,9 +132,14 @@ int main(void) {
 						//Cierra el socket cerrado en el otro extremo para que pueda ser reutilizado
 						close(sdc);
 						//Dado socket (sdc) obtiene numero
-						nro = buscarPosicionPorSocket(sdc);
+						nro = buscarPosicionUsuario(sdc);
 						//Lo marca como cerrado
 						usersArray[nro].socketNumber = 0; // se le pone 0 porq al iniciarse el array arranca con 0 y se usa esa comparacion, antes era -1;
+						usersArray[nro].idUsuario = 0;
+						usersArray[nro].address.puerto = 0;
+
+						//Borra los contenidos
+						deleteContentArray(sdc);
 						//Borra descriptor del set
 						FD_CLR(sdc, &conjunto);
 
