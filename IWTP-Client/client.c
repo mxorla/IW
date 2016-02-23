@@ -353,6 +353,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 			case 2: {
 				printf("Iniciando Streaming \r\n");
 				guardarBuffer(msg);
+				system("mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/BOCA.mp4");
 				close(Clisd);
 				ok = 0;
 
