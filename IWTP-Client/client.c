@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 	childPID = fork();
 
 	if (childPID >= 0) {	// fork was successful
-		if (childPID == 0) {	// Parent process- client
+		if (childPID != 0) {	// Parent process- client
 			if (argc < 2) {
 				printf(
 						"Debe configurar el parametro correspondiente a la IP del servidor\n",
@@ -285,11 +285,10 @@ int main(int argc, char *argv[]) {
 									char title[50];
 
 									for (int i = 0; i < lenTitle; i++) {
-										title[i+1]= '\0';
+										title[i + 1] = '\0';
 										title[i] = msg->MSG[i + 1];
 
 									}
-
 
 									char* folder =
 											"/home/mxorla/workspace/IWTP-Client/Shared/";
@@ -299,24 +298,24 @@ int main(int argc, char *argv[]) {
 									strcat(path, title);
 
 									msg->LEN = 14;
-														//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
-														msg->ID_USER = (uint8_t) connfd;
-														msg->TYPE = 45;
-														msg->MSG[0] = 'C';
-														msg->MSG[1] = 'o';
-														msg->MSG[2] = 'n';
-														msg->MSG[3] = 'e';
-														msg->MSG[4] = 'c';
-														msg->MSG[5] = 't';
-														msg->MSG[6] = 'a';
-														msg->MSG[7] = 'd';
-														msg->MSG[8] = 'o';
-														msg->MSG[9] = '\0';
+									//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
+									msg->ID_USER = (uint8_t) connfd;
+									msg->TYPE = 45;
+									msg->MSG[0] = 'C';
+									msg->MSG[1] = 'o';
+									msg->MSG[2] = 'n';
+									msg->MSG[3] = 'e';
+									msg->MSG[4] = 'c';
+									msg->MSG[5] = 't';
+									msg->MSG[6] = 'a';
+									msg->MSG[7] = 'd';
+									msg->MSG[8] = 'o';
+									msg->MSG[9] = '\0';
 
-														writeMsg(connfd, msg);
+									writeMsg(connfd, msg);
 								} else {
 									if (msg->TYPE == 55) {
-									//______________________
+										//______________________
 										while (1) {
 
 											FILE *fp = fopen(path, "rb");
@@ -387,9 +386,15 @@ int main(int argc, char *argv[]) {
 }
 
 void *runRepro(void *data) {
-	int interval = *(int *) data;
-	usleep(interval);
-	system("mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/Shared/Recibidos/sample_file.mp4");
+	char * name = (char *) data;
+	usleep(30);
+	char * folder ="mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
+
+					char* command = (char *) malloc(1 + strlen(folder) + strlen(name));
+					strcpy(command, folder);
+					strcat(command, name);
+
+	system(command);
 }
 
 void iniciarStreaming(content_t de, struct protocolo_t *msg) {
@@ -430,7 +435,8 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 	bufferTitle[longTitle + 1] = '\0';
 
 	while (1) {
-		if (readMsg(sockfd, msg) > 0 || (bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
+		if (readMsg(sockfd, msg) > 0
+				|| (bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
 			if (msg->TYPE == 98) {
 				printf("mensaje %s", msg->MSG);
 				msg->LEN = 14;
@@ -444,15 +450,48 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 			if (msg->TYPE == 45) {
 				msg->LEN = 14;
 
-								msg->ID_USER = (uint8_t) sockfd;
-								msg->TYPE = 55;
-								memcpy(msg->MSG, bufferTitle, longTitle + 2);
+				msg->ID_USER = (uint8_t) sockfd;
+				msg->TYPE = 55;
+				memcpy(msg->MSG, bufferTitle, longTitle + 2);
 
-								writeMsg(sockfd, msg);
+				writeMsg(sockfd, msg);
+
+
+				char title[50];
+				memcpy(title, bufferTitle + sizeof(char), longTitle + 2);
+
+				char* folder = "/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
+				char* path = (char *) malloc(1 + strlen(folder) + strlen(title));
+				strcpy(path, folder);
+				strcat(path, title);
+
+				FILE *fp;
+				fp =
+						fopen(path, "ab");
+				if (NULL == fp) {
+					perror("Error opening file");
+					exit(-1);
+				}
+
+				pthread_create(&runReprothread, NULL, runRepro, &title);
+				/*  256 bytes */
+				while ((bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
+					printf("Bytes recibidos %d\n", bytesReceived);
+
+					fwrite(recvBuff, 1, bytesReceived, fp);
+
+				}
+
+				if (bytesReceived < 0) {
+					printf("\n Read Error \n");
+				}
+			}
+
+			if (bytesReceived > 0) {
 				FILE *fp;
 				fp =
 						fopen(
-								"/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/sample_file.mp4",
+								"/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/sample_file.3gp",
 								"ab");
 				if (NULL == fp) {
 					perror("Error opening file");
@@ -467,32 +506,6 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 					fwrite(recvBuff, 1, bytesReceived, fp);
 
 				}
-
-				if (bytesReceived < 0) {
-					printf("\n Read Error \n");
-				}
-			}
-
-			if(bytesReceived>0)
-			{
-				FILE *fp;
-								fp =
-										fopen(
-												"/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/sample_file.3gp",
-												"ab");
-								if (NULL == fp) {
-									perror("Error opening file");
-									exit(-1);
-								}
-
-				pthread_create(&runReprothread, NULL, runRepro, &interval);
-								/*  256 bytes */
-								while ((bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
-									printf("Bytes recibidos %d\n", bytesReceived);
-
-									fwrite(recvBuff, 1, bytesReceived, fp);
-
-								}
 			}
 		}
 	}
