@@ -169,7 +169,7 @@ void lookUpContent(int sd, struct protocolo_t *msg) {
 
 	}
 
-	char* folder = "/home/mxorla/workspace/IWTP-Client/";
+	char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/";
 	char * path = (char *) malloc(1 + strlen(folder) + strlen(title));
 	strcpy(path, folder);
 	strcat(path, title);
@@ -257,7 +257,7 @@ void guardarBuffer(struct protocolo_t *msg) {
 
 	}
 
-	char* folder = "/home/mxorla/workspace/IWTP-Client/";
+	char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/";
 	char * path = (char *) malloc(1 + strlen(folder) + strlen(title));
 	strcpy(path, folder);
 	strcat(path, title);

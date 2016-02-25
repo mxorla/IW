@@ -21,7 +21,6 @@ prop_t CliServer;
 //int Clilon;
 //struct hostent * Clih;
 
-
 char *getcwd(char *buf, size_t size);
 
 void printMenu() {
@@ -171,24 +170,21 @@ int main(int argc, char *argv[]) {
 			pthread_create(&thread, NULL, checkConnections, &interval);
 
 			while (1) {
-				int opcion;
-				//system("clear");
-
 				printMenu();
+				int opcion;
+				scanf("%d", &opcion); //Leyendo opcion
+
+				//system("clear");
 
 				switch (opcion) {
 				case 1: {
 					publicarContenido(sd, userIdAssigned, msg);
-					printMenu();
 					printf("> \r");
-					scanf("%d", &opcion); //Leyendo opcion
 				}
 					break;
 				case 2: {
 					consultarContenido(sd, userIdAssigned, msg);
-
 					printf("> \r");
-					scanf("%d", &opcion); //Leyendo opcion
 				}
 					break;
 				case 3: {
@@ -197,21 +193,19 @@ int main(int argc, char *argv[]) {
 					scanf("%d", &id);
 					consultarInformacionContenido(sd, id, userIdAssigned, msg);
 					printf("> \r");
-					scanf("%d", &opcion); //Leyendo opcion
 					break;
 				}
 				case 4: {
 					desconectar(sd, userIdAssigned, msg);
 					printf("> \r");
-					scanf("%d", &opcion); //Leyendo opcion
 				}
 					break;
 				default: {
 					printf("> \r");
-					scanf("%d", &opcion); //Leyendo opcion
 				}
 					break;
 				}
+				opcion = NULL;
 
 			}
 		} else {
@@ -245,7 +239,7 @@ int main(int argc, char *argv[]) {
 			FD_SET(listenfd, &conjunto2);
 			msg = (struct protocolo_t *) txBuf;
 			int ok = 1;
-			while (ok) {
+			while (1) {
 				copia2 = conjunto2;
 				select(FD_SETSIZE, &copia2, NULL, NULL, NULL);
 
@@ -292,7 +286,7 @@ int main(int argc, char *argv[]) {
 									}
 
 									char* folder =
-											"/home/mxorla/workspace/IWTP-Client/Shared/";
+											"/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/";
 									path = (char *) malloc(
 											1 + strlen(folder) + strlen(title));
 									strcpy(path, folder);
@@ -318,54 +312,46 @@ int main(int argc, char *argv[]) {
 									if (msg->TYPE == 55) {
 
 										//______________________
-										while (ok) {
 
-											FILE *fp = fopen(path, "rb");
-											if (fp == NULL) {
-												printf("File opern error");
-												return 1;
-											}
-
-											while (ok) {
-
-												/*  256 bytes */
-												unsigned char buff[256] = { 0 };
-												int nread = fread(buff, 1, 256,
-														fp);
-												printf("Bytes leidos %d \n",
-														nread);
-
-												if (nread > 0) {
-													printf("Enviando \n");
-													write(connfd, buff, nread);
-												}
-
-												if (nread < 256) {
-													if (feof(fp)) {
-														printf("End of file\n");
-														//close(connfd);
-														//FD_CLR(sdc, &conjunto);
-														ok = 0;
-													}
-													if (ferror(fp))
-														printf(
-																"Error reading\n");
-													//break;
-												}
-
-											}
-
-											msg->LEN = 14;
-											msg->ID_USER = (uint8_t) connfd;
-											msg->TYPE = 88;
-											msg->MSG[0] = '\0';
-
-											writeMsg(connfd, msg);
-
-
+										FILE *fp = fopen(path, "rb");
+										if (fp == NULL) {
+											printf("File opern error");
+											ok = 0;
 										}
 
+										while (ok) {
+											/*  256 bytes */
+											unsigned char buff[256] = { 0 };
+											int nread = fread(buff, 1, 256, fp);
+											printf("Bytes leidos %d \n", nread);
+
+											if (nread > 0) {
+												printf("Enviando \n");
+												write(connfd, buff, nread);
+											}
+
+											if (nread < 256) {
+												if (feof(fp)) {
+													printf("End of file\n");
+													//close(connfd);
+													//FD_CLR(sdc, &conjunto);
+													ok = 0;
+												}
+												if (ferror(fp))
+													printf(
+															"Error reading\n");
+												//break;
+											}
+										}
+
+										msg->LEN = 14;
+										msg->ID_USER = (uint8_t) connfd;
+										msg->TYPE = 88;
+										msg->MSG[0] = '\0';
+
+										writeMsg(connfd, msg);
 										close(connfd);
+
 										sleep(1);
 										//______________________
 
@@ -390,7 +376,6 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
-
 		}
 	} else { // fork failed
 		printf("\n Fork failed, quitting!!!!!!\n");
@@ -404,7 +389,7 @@ void *runRepro(void *data) {
 	char * name = (char *) data;
 	usleep(30);
 	char * folder =
-			"mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
+			"mplayer -vfm ffmpeg /media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
 
 	char* command = (char *) malloc(1 + strlen(folder) + strlen(name));
 	strcpy(command, folder);
@@ -451,10 +436,11 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 	}
 	bufferTitle[longTitle + 1] = '\0';
 
+	int ok = 1;
 	while (1) {
 //		if (readMsg(sockfd, msg) > 0 || (bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
-		if (readMsg(sockfd, msg) > 0 ) {
-		if (msg->TYPE == 98) {
+		if (readMsg(sockfd, msg) > 0) {
+			if (msg->TYPE == 98) {
 				printf("mensaje %s", msg->MSG);
 				msg->LEN = 14;
 
@@ -480,8 +466,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				char title[50];
 				memcpy(title, bufferTitle + sizeof(char), longTitle + 2);
 
-				char* folder =
-						"/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
+				char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
 				char* path = (char *) malloc(
 						1 + strlen(folder) + strlen(title));
 				strcpy(path, folder);
@@ -494,26 +479,33 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 					exit(-1);
 				}
 
-				pthread_create(&runReprothread, NULL, runRepro, &title);
 				/*  256 bytes */
+				int flagThread = 1;
 				while ((bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
 					printf("Bytes recibidos %d\n", bytesReceived);
 
 					fwrite(recvBuff, 1, bytesReceived, fp);
+					if (flagThread) {
+						pthread_create(&runReprothread, NULL, runRepro, &title);
+						flagThread = 0;
+					}
 
 				}
 
 				if (bytesReceived < 0) {
 					printf("\n Read Error \n");
 				}
+
+				ok = 0;
 			}
 
 			/*if (bytesReceived > 0) {
 
 
-				}
-			}*/
+			 }
+			 }*/
 		}
+		//close(sockfd);
 	}
 
 	exit(0);
@@ -535,13 +527,15 @@ void loadConfiguration() {
 	 strcpy(PathFolder, cwd);
 	 strcat(PathFolder, "/");
 
-	 strcpy(PathFolder,  "/home/mxorla/workspace/IWTP-Client/");
+	 strcpy(PathFolder,  "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/");
 
 	 char* path = (char *) malloc(1 + strlen(PathFolder) + strlen(title));
 	 strcpy(path, PathFolder);
 	 strcat(path, title);
 	 fp = fopen(path, "r");*/
-	fp = fopen("/home/mxorla/workspace/IWTP-Client/config", "r");
+	fp = fopen(
+			"/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/config",
+			"r");
 	while ((read = getline(&line, &len, fp)) != -1) {
 
 		if (strlen(line) > 6) {
