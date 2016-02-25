@@ -9,18 +9,18 @@
 #include <unistd.h>
 
 int sd;
-int sd2;
-int Clisd;
+//int sd2;
+//int Clisd;
 struct protocolo_t *msg;
 char txBuf[P_SIZE];
-users_t user;
+//users_t user;
 uint8_t userIdAssigned;
 prop_t CliServer;
 
-struct sockaddr_in Cliservidor;
-int Clilon;
-struct hostent * Clih;
-pthread_t runReprothread;
+//struct sockaddr_in Cliservidor;
+//int Clilon;
+//struct hostent * Clih;
+
 
 char *getcwd(char *buf, size_t size);
 
@@ -244,7 +244,8 @@ int main(int argc, char *argv[]) {
 			FD_ZERO(&conjunto2);
 			FD_SET(listenfd, &conjunto2);
 			msg = (struct protocolo_t *) txBuf;
-			while (1) {
+			int ok = 1;
+			while (ok) {
 				copia2 = conjunto2;
 				select(FD_SETSIZE, &copia2, NULL, NULL, NULL);
 
@@ -315,8 +316,9 @@ int main(int argc, char *argv[]) {
 									writeMsg(connfd, msg);
 								} else {
 									if (msg->TYPE == 55) {
+
 										//______________________
-										while (1) {
+										while (ok) {
 
 											FILE *fp = fopen(path, "rb");
 											if (fp == NULL) {
@@ -324,7 +326,7 @@ int main(int argc, char *argv[]) {
 												return 1;
 											}
 
-											while (1) {
+											while (ok) {
 
 												/*  256 bytes */
 												unsigned char buff[256] = { 0 };
@@ -339,22 +341,34 @@ int main(int argc, char *argv[]) {
 												}
 
 												if (nread < 256) {
-													if (feof(fp))
+													if (feof(fp)) {
 														printf("End of file\n");
+														//close(connfd);
+														//FD_CLR(sdc, &conjunto);
+														ok = 0;
+													}
 													if (ferror(fp))
 														printf(
 																"Error reading\n");
-													break;
+													//break;
 												}
 
 											}
 
-											close(connfd);
+											msg->LEN = 14;
+											msg->ID_USER = (uint8_t) connfd;
+											msg->TYPE = 88;
+											msg->MSG[0] = '\0';
 
-											sleep(1);
+											writeMsg(connfd, msg);
+
+
 										}
-										return 0;
+
+										close(connfd);
+										sleep(1);
 										//______________________
+
 									}
 
 								}
@@ -376,6 +390,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
+
 		}
 	} else { // fork failed
 		printf("\n Fork failed, quitting!!!!!!\n");
@@ -388,16 +403,18 @@ int main(int argc, char *argv[]) {
 void *runRepro(void *data) {
 	char * name = (char *) data;
 	usleep(30);
-	char * folder ="mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
+	char * folder =
+			"mplayer -vfm ffmpeg /home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
 
-					char* command = (char *) malloc(1 + strlen(folder) + strlen(name));
-					strcpy(command, folder);
-					strcat(command, name);
+	char* command = (char *) malloc(1 + strlen(folder) + strlen(name));
+	strcpy(command, folder);
+	strcat(command, name);
 
 	system(command);
 }
 
 void iniciarStreaming(content_t de, struct protocolo_t *msg) {
+	pthread_t runReprothread;
 	int sockfd = 0;
 	int bytesReceived = 0;
 	int interval = 30;
@@ -435,9 +452,9 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 	bufferTitle[longTitle + 1] = '\0';
 
 	while (1) {
-		if (readMsg(sockfd, msg) > 0
-				|| (bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
-			if (msg->TYPE == 98) {
+//		if (readMsg(sockfd, msg) > 0 || (bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
+		if (readMsg(sockfd, msg) > 0 ) {
+		if (msg->TYPE == 98) {
 				printf("mensaje %s", msg->MSG);
 				msg->LEN = 14;
 
@@ -446,6 +463,10 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				memcpy(msg->MSG, bufferTitle, longTitle + 2);
 
 				writeMsg(sockfd, msg);
+			}
+			if (msg->TYPE == 88) {
+				printf("mensaje fin");
+				close(sockfd);
 			}
 			if (msg->TYPE == 45) {
 				msg->LEN = 14;
@@ -456,18 +477,18 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 
 				writeMsg(sockfd, msg);
 
-
 				char title[50];
 				memcpy(title, bufferTitle + sizeof(char), longTitle + 2);
 
-				char* folder = "/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
-				char* path = (char *) malloc(1 + strlen(folder) + strlen(title));
+				char* folder =
+						"/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/";
+				char* path = (char *) malloc(
+						1 + strlen(folder) + strlen(title));
 				strcpy(path, folder);
 				strcat(path, title);
 
 				FILE *fp;
-				fp =
-						fopen(path, "ab");
+				fp = fopen(path, "ab");
 				if (NULL == fp) {
 					perror("Error opening file");
 					exit(-1);
@@ -487,26 +508,11 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				}
 			}
 
-			if (bytesReceived > 0) {
-				FILE *fp;
-				fp =
-						fopen(
-								"/home/mxorla/workspace/IWTP-Client/Shared/Recibidos/sample_file.3gp",
-								"ab");
-				if (NULL == fp) {
-					perror("Error opening file");
-					exit(-1);
-				}
+			/*if (bytesReceived > 0) {
 
-				pthread_create(&runReprothread, NULL, runRepro, &interval);
-				/*  256 bytes */
-				while ((bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
-					printf("Bytes recibidos %d\n", bytesReceived);
-
-					fwrite(recvBuff, 1, bytesReceived, fp);
 
 				}
-			}
+			}*/
 		}
 	}
 
