@@ -3,11 +3,11 @@
 ##Streaming de Video P2P
 
 ##Developers
->Matias Orlandella
->Joaquin Larrañaga
->Fabrizio Migotto
+> Matias Orlandella;
+> Joaquin Larrañaga;
+> Fabrizio Migotto;
 
 ##Profesor
-Agustin Eijo
+> Agustin Eijo;
 
 
