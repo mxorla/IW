@@ -156,68 +156,6 @@ int buscarPosicionPorSocket(int aux) {
 	return ret;
 }
 
-void lookUpContent(int sd, struct protocolo_t *msg) {
-
-	int i, j;
-
-	uint8_t lenTitle = msg->MSG[0];
-	char title[50];
-
-	for (i = 0; i < lenTitle; i++) {
-		title[i] = msg->MSG[i + 1];
-
-	}
-
-	char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/";
-	char * path = (char *) malloc(1 + strlen(folder) + strlen(title));
-	strcpy(path, folder);
-	strcat(path, title);
-
-	FILE *fileptr;
-	char *buffer;
-	long filelen;
-
-	fileptr = fopen(path, "rb"); // Open the file in binary mode
-	fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
-	filelen = ftell(fileptr);         // Get the current byte offset in the file
-	rewind(fileptr);                   // Jump back to the beginning of the file
-
-	buffer = (char *) malloc((filelen + 1) * sizeof(char)); // Enough memory for file + \0
-
-	fread(buffer, filelen, 1, fileptr); // Read in the entire file
-	fclose(fileptr); // Close the file
-
-	char destBuffer[1000];
-	for (j = 0; j < sizeof(destBuffer); j++)
-		destBuffer[j] = 0x00;
-
-	memcpy(destBuffer, buffer, strlen(buffer));
-
-	//TODO hacer streaming de archivo
-
-	msg->LEN = strlen(destBuffer);
-	msg->ID_USER = 1;
-	msg->TYPE = 2;
-	uint8_t length = strlen(title);
-	msg->MSG[0] = length;
-//	length += (sizeof(uint8_t) * sizeof(char));
-
-	memcpy(msg->MSG + length, title, strlen(title));
-
-	uint8_t lengthDestBuff = strlen(destBuffer);
-	length++;
-	msg->MSG[length] = lengthDestBuff;
-	memcpy(msg->MSG + length, &lengthDestBuff, sizeof(uint8_t));
-	length += (sizeof(uint8_t) * sizeof(char));
-
-	memcpy(msg->MSG + length, destBuffer, strlen(destBuffer));
-
-	length = (strlen(title) + lengthDestBuff + 2);
-	msg->MSG[length] = '\0';
-	writeMsg(sd, msg);
-
-}
-
 void SendCliServerData(int sd, uint8_t userIdAssigned, prop_t propietario, struct protocolo_t *msg) {
 
 	msg->LEN = 5;
@@ -233,36 +171,6 @@ void SendCliServerData(int sd, uint8_t userIdAssigned, prop_t propietario, struc
 	msg->MSG[3] = '\0';
 
 	writeMsg(sd, msg);
-}
-
-void guardarBuffer(struct protocolo_t *msg) {
-	/*
-	 char buffer[MSG_LEN - 2];
-	 uint8_t sec = msg->ID_USER;
-	 if (sec != -1) {
-	 uint8_t len = msg->LEN;
-	 for (i = 0; i < len; i++) {
-	 buffer[i] = msg->MSG[i];
-	 }
-	 }
-	 */
-	int i;
-	uint8_t lenTitle = msg->MSG[0];
-	char title[50];
-
-	for (i = 0; i < lenTitle; i++) {
-		title[i] = msg->MSG[i + 1];
-
-	}
-
-	char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/";
-	char * path = (char *) malloc(1 + strlen(folder) + strlen(title));
-	strcpy(path, folder);
-	strcat(path, title);
-
-	FILE *f = fopen(path, "wb");
-	fwrite(msg->MSG + lenTitle + 2, sizeof(char), strlen(msg->MSG) - lenTitle - 2, f);
-	fclose(f);
 }
 
 void solicitarFile(int sd, struct protocolo_t *msg) {

@@ -7,20 +7,13 @@
 #include <termios.h>
 #include <ctype.h>
 
+char* pathIW;
+
 int sd;
-//int sd2;
-//int Clisd;
 struct protocolo_t *msg;
 char txBuf[P_SIZE];
-//users_t user;
 uint8_t userIdAssigned;
 prop_t CliServer;
-
-//struct sockaddr_in Cliservidor;
-//int Clilon;
-//struct hostent * Clih;
-
-char *getcwd(char *buf, size_t size);
 
 void printMenu() {
 	//system("clear");
@@ -107,9 +100,22 @@ void *checkConnections(void *data) {
 }
 
 //------------------------------------------------------------------------------
-//
+// MAIN
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
+
+	pathIW = malloc(strlen("./Debug") + 1);
+	strcpy(pathIW, "./Debug");
+
+	if( access( pathIW, F_OK ) != -1 ) {
+		// file exists
+		pathIW = malloc(strlen("./..") + 1);
+		strcpy(pathIW, "./..");
+	} else {
+		// file doesn't exist
+		pathIW = malloc(strlen(".") + 1);
+		strcpy(pathIW, ".");
+	}
 
 	//Server Variables
 	int n, sdc, nro;
@@ -231,13 +237,10 @@ int main(int argc, char *argv[]) {
 				if (FD_ISSET(listenfd, &copia2)) { // Recibe un cliente que se quiere conectar
 					lon = sizeof(cliente);
 					connfd = accept(listenfd, (struct sockaddr *) &cliente, &lon);
-					//connfd = accept(listenfd,(struct sockaddr*) NULL, NULL);
 
 					FD_SET(connfd, &conjunto2);
 
 					//Responde q esta conectado
-					msg->LEN = 14;
-					//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
 					msg->ID_USER = (uint8_t) connfd;
 					msg->TYPE = 98;
 					msg->MSG[0] = 'C';
@@ -269,13 +272,16 @@ int main(int argc, char *argv[]) {
 
 									}
 
-									char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/";
+									char* folder = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/Shared/"));
+									strcat(folder, pathIW);
+									strcat(folder, "/IWTP-Client/Shared/");
+
+
 									path = (char *) malloc(1 + strlen(folder) + strlen(title));
 									strcpy(path, folder);
 									strcat(path, title);
 
 									msg->LEN = 14;
-									//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
 									msg->ID_USER = (uint8_t) connfd;
 									msg->TYPE = 45;
 									msg->MSG[0] = '\0';
@@ -306,8 +312,6 @@ int main(int argc, char *argv[]) {
 											if (nread < 256) {
 												if (feof(fp)) {
 													printf("End of file\n");
-													//close(connfd);
-													//FD_CLR(sdc, &conjunto);
 													ok = 0;
 												}
 												if (ferror(fp))
@@ -356,7 +360,13 @@ void loadConfiguration() {
 	char * line = NULL;
 	size_t len = 0;
 	ssize_t read;
-	fp = fopen("/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/config", "r");
+
+	char* path = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/config"));
+	strcat(path, pathIW);
+	strcat(path, "/IWTP-Client/config");
+
+	fp = fopen(path,"r");
+
 	while ((read = getline(&line, &len, fp)) != -1) {
 
 		if (strlen(line) > 6) {
