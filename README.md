@@ -1,8 +1,7 @@
-# Internetworking
+#Internetworking
 
-##DEVELOPERS:
-#Matias Orlandella
-#Joaquin Larrañaga
-#Fabrizio Migotto
+##Matias Orlandella
+##Joaquin Larrañaga
+##Fabrizio Migotto
 
 
