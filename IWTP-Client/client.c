@@ -8,6 +8,8 @@
 #include <ctype.h>
 #include <unistd.h>
 
+char* pathIW;
+
 int sd;
 //int sd2;
 //int Clisd;
@@ -119,6 +121,19 @@ void *checkConnections(void *data) {
 //
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
+
+	pathIW = malloc(strlen("./Debug") + 1);
+	strcpy(pathIW, "./Debug");
+
+	if( access( pathIW, F_OK ) != -1 ) {
+		// file exists
+		pathIW = malloc(strlen("./..") + 1);
+		strcpy(pathIW, "./..");
+	} else {
+		// file doesn't exist
+		pathIW = malloc(strlen(".") + 1);
+		strcpy(pathIW, ".");
+	}
 
 	//Server Variables
 	int n, sdc, nro;
@@ -253,7 +268,7 @@ int main(int argc, char *argv[]) {
 
 					//Responde q esta conectado
 					msg->LEN = 14;
-					//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);
+					//msg->ID_USER=(uint16_t) ~((unsigned int) sdc);/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/
 					msg->ID_USER = (uint8_t) connfd;
 					msg->TYPE = 98;
 					msg->MSG[0] = 'C';
@@ -285,10 +300,11 @@ int main(int argc, char *argv[]) {
 
 									}
 
-									char* folder =
-											"/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/";
-									path = (char *) malloc(
-											1 + strlen(folder) + strlen(title));
+									char* folder = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/Shared/"));
+									strcat(folder, pathIW);
+									strcat(folder, "/IWTP-Client/Shared/");
+
+									path = (char *) malloc(1 + strlen(folder) + strlen(title));
 									strcpy(path, folder);
 									strcat(path, title);
 
@@ -388,8 +404,11 @@ int main(int argc, char *argv[]) {
 void *runRepro(void *data) {
 	char * name = (char *) data;
 	usleep(30);
-	char * folder =
-			"mplayer -vfm ffmpeg /media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
+
+	char * folder = (char *) malloc(1 + strlen("mplayer -vfm ffmpeg ") + strlen(pathIW) + strlen("/IWTP-Client/Shared/Recibidos/"));
+	strcat(folder, "mplayer -vfm ffmpeg ");
+	strcat(folder, pathIW);
+	strcat(folder, "/IWTP-Client/Shared/Recibidos/");
 
 	char* command = (char *) malloc(1 + strlen(folder) + strlen(name));
 	strcpy(command, folder);
@@ -466,7 +485,10 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				char title[50];
 				memcpy(title, bufferTitle + sizeof(char), longTitle + 2);
 
-				char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
+				char* folder = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/Shared/Recibidos/"));
+				strcat(folder, pathIW);
+				strcat(folder, "/IWTP-Client/Shared/Recibidos/");
+
 				char* path = (char *) malloc(
 						1 + strlen(folder) + strlen(title));
 				strcpy(path, folder);
@@ -533,8 +555,13 @@ void loadConfiguration() {
 	 strcpy(path, PathFolder);
 	 strcat(path, title);
 	 fp = fopen(path, "r");*/
+
+	char* path = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/config"));
+	strcat(path, pathIW);
+	strcat(path, "/IWTP-Client/config");
+
 	fp = fopen(
-			"/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/config",
+			path,
 			"r");
 	while ((read = getline(&line, &len, fp)) != -1) {
 
