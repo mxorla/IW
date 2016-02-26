@@ -32,8 +32,7 @@ void printMenu() {
 	printf("3 -		Consultar Informacion Contenido\n");
 	printf("4 -		Desconectar\n");
 
-	printf(
-			"---------------------------------------------------------------------- \r\n");
+	printf("---------------------------------------------------------------------- \r\n");
 }
 
 //------------------------------------------------------------------------------
@@ -45,23 +44,18 @@ void *checkConnections(void *data) {
 	content_t de;
 	while (1) {
 		if (readMsg(sd, msg) > 0) {
-
 			//nro=0;
-
 			switch (msg->TYPE) {
 			case 1: {
 				//printMenu();
 				int j, cant, act = 1;
-				printf(
-						"	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
-				printf(
-						"---------------------------------------------------------------------- \r\n");
+				printf("	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
+				printf("---------------------------------------------------------------------- \r\n");
 				cant = msg->MSG[0];
 				for (j = 0; j < cant; j++) {
 					de = BytesToData(&act, msg);
 
-					printf("%d			%s           %s        %s", de.id_content,
-							de.det.title, de.det.aut, de.det.desc);
+					printf("%d			%s           %s        %s", de.id_content, de.det.title, de.det.aut, de.det.desc);
 					printf("\r\n");
 
 				}
@@ -75,12 +69,10 @@ void *checkConnections(void *data) {
 				printMenu();
 				printf("Datos del contenido \r\n");
 				printf("	 Titulo     |        Propietario IP:PUERTO \r\n");
-				printf(
-						"---------------------------------------------------------------------- \r\n");
+				printf("---------------------------------------------------------------------- \r\n");
 
 				de = BytesToDataIp(msg);
-				printf("     %s                  %s:%d", de.det.title,
-						de.propietario.ip, de.propietario.puerto);
+				printf("     %s                  %s:%d", de.det.title, de.propietario.ip, de.propietario.puerto);
 				printf("> \r");
 
 				iniciarStreaming(de, msg);
@@ -94,9 +86,7 @@ void *checkConnections(void *data) {
 
 			case 99: {
 				userIdAssigned = msg->ID_USER;
-				printf(
-						"Ya esta conectado con el servidor, su id de usuario es %d  \r\n",
-						msg->ID_USER);
+				printf("Ya esta conectado con el servidor, su id de usuario es %d  \r\n", msg->ID_USER);
 				if (msg->LEN != 0) {
 					printf("El Servidor Respondio --->   %s\n", msg->MSG);
 				}
@@ -145,9 +135,7 @@ int main(int argc, char *argv[]) {
 	if (childPID >= 0) {	// fork was successful
 		if (childPID != 0) {	// Parent process- client
 			if (argc < 2) {
-				printf(
-						"Debe configurar el parametro correspondiente a la IP del servidor\n",
-						argv[0]);
+				printf("Debe configurar el parametro correspondiente a la IP del servidor\n", argv[0]);
 				exit(-1);
 			}
 
@@ -216,8 +204,7 @@ int main(int argc, char *argv[]) {
 
 			listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
-			printf("Socket retrieve success in %s:%d\n", CliServer.ip,
-					CliServer.puerto);
+			printf("Socket retrieve success in %s:%d\n", CliServer.ip, CliServer.puerto);
 
 			memset(&serv_addr, '0', sizeof(serv_addr));
 			memset(sendBuff, '0', sizeof(sendBuff));
@@ -243,8 +230,7 @@ int main(int argc, char *argv[]) {
 
 				if (FD_ISSET(listenfd, &copia2)) { // Recibe un cliente que se quiere conectar
 					lon = sizeof(cliente);
-					connfd = accept(listenfd, (struct sockaddr *) &cliente,
-							&lon);
+					connfd = accept(listenfd, (struct sockaddr *) &cliente, &lon);
 					//connfd = accept(listenfd,(struct sockaddr*) NULL, NULL);
 
 					FD_SET(connfd, &conjunto2);
@@ -283,10 +269,8 @@ int main(int argc, char *argv[]) {
 
 									}
 
-									char* folder =
-											"/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/";
-									path = (char *) malloc(
-											1 + strlen(folder) + strlen(title));
+									char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/";
+									path = (char *) malloc(1 + strlen(folder) + strlen(title));
 									strcpy(path, folder);
 									strcat(path, title);
 
@@ -336,8 +320,7 @@ int main(int argc, char *argv[]) {
 													ok = 0;
 												}
 												if (ferror(fp))
-													printf(
-															"Error reading\n");
+													printf("Error reading\n");
 												//break;
 											}
 										}
@@ -349,6 +332,7 @@ int main(int argc, char *argv[]) {
 
 										writeMsg(connfd, msg);
 										close(connfd);
+										fclose(fp);
 
 										sleep(1);
 										//______________________
@@ -361,7 +345,6 @@ int main(int argc, char *argv[]) {
 							else {
 								//Cierra el socket cerrado en el otro extremo para que pueda ser reutilizado
 								close(connfd);
-								//Dado socket (sdc) obtiene numero
 
 								//Borra descriptor del set
 								FD_CLR(connfd, &conjunto2);
@@ -385,9 +368,8 @@ int main(int argc, char *argv[]) {
 
 void *runRepro(void *data) {
 	char * name = (char *) data;
-	usleep(30);
-	char * folder =
-			"mplayer -vfm ffmpeg /media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
+	usleep(300);
+	char * folder = "mplayer -vfm ffmpeg /media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
 
 	char* command = (char *) malloc(1 + strlen(folder) + strlen(name));
 	strcpy(command, folder);
@@ -414,8 +396,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 	serv_addr.sin_port = htons(de.propietario.puerto); // port
 	serv_addr.sin_addr.s_addr = inet_addr(de.propietario.ip);
 
-	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr))
-			< 0) {
+	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
 		perror("\n Error : Connect Failed \n");
 		exit(-1);
 	}
@@ -465,8 +446,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				memcpy(title, bufferTitle + sizeof(char), longTitle + 2);
 
 				char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
-				char* path = (char *) malloc(
-						1 + strlen(folder) + strlen(title));
+				char* path = (char *) malloc(1 + strlen(folder) + strlen(title));
 				strcpy(path, folder);
 				strcat(path, title);
 
@@ -495,6 +475,8 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				}
 
 				ok = 0;
+				fclose(fp);
+				close(sockfd);
 			}
 
 			/*if (bytesReceived > 0) {
@@ -503,10 +485,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 			 }
 			 }*/
 		}
-		//close(sockfd);
 	}
-
-	//exit(0);
 }
 
 void loadConfiguration() {
@@ -531,9 +510,7 @@ void loadConfiguration() {
 	 strcpy(path, PathFolder);
 	 strcat(path, title);
 	 fp = fopen(path, "r");*/
-	fp = fopen(
-			"/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/config",
-			"r");
+	fp = fopen("/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/config", "r");
 	while ((read = getline(&line, &len, fp)) != -1) {
 
 		if (strlen(line) > 6) {
