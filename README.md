@@ -7,11 +7,11 @@
 **Keywords.** Redes, Internetworking, Streaming, Video, Universidad Tecnológica Nacional, BSD Socket, UNIX.
 
 ##Developers
-> Larrañaga Joaquín
+Larrañaga Joaquín
 
-> Migotto Juan Fabrizio
+Migotto Juan Fabrizio
 
-> Orlandella Matias
+Orlandella Matias
 
 ##Profesor
-> Agustin Eijo
+Agustin Eijo
