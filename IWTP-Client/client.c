@@ -7,8 +7,6 @@
 #include <termios.h>
 #include <ctype.h>
 
-char* pathIW;
-
 int sd;
 struct protocolo_t *msg;
 char txBuf[P_SIZE];
@@ -24,8 +22,7 @@ void printMenu() {
 	printf("3 -		Iniciar streaming de contenido\n");
 	printf("4 -		Desconectar\n");
 
-	printf(
-			"---------------------------------------------------------------------- \r\n");
+	printf("---------------------------------------------------------------------- \r\n");
 }
 
 //------------------------------------------------------------------------------
@@ -42,16 +39,13 @@ void *checkConnections(void *data) {
 			case 1: {
 				//printMenu();
 				int j, cant, act = 1;
-				printf(
-						"	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
-				printf(
-						"---------------------------------------------------------------------- \r\n");
+				printf("	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
+				printf("---------------------------------------------------------------------- \r\n");
 				cant = msg->MSG[0];
 				for (j = 0; j < cant; j++) {
 					de = BytesToData(&act, msg);
 
-					printf("%d		 %s              %s              %s", de.id_content,
-							de.det.title, de.det.aut, de.det.desc);
+					printf("%d		 %s              %s              %s", de.id_content, de.det.title, de.det.aut, de.det.desc);
 					printf("\r\n");
 
 				}
@@ -64,8 +58,7 @@ void *checkConnections(void *data) {
 			case 3: {
 				printMenu();
 				de = BytesToDataIp(msg);
-				printf("     %s                  %s:%d", de.det.title,
-						de.propietario.ip, de.propietario.puerto);
+				printf("     %s                  %s:%d", de.det.title, de.propietario.ip, de.propietario.puerto);
 				printf("> \r");
 
 				iniciarStreaming(de, msg);
@@ -81,9 +74,7 @@ void *checkConnections(void *data) {
 
 			case 99: {
 				userIdAssigned = msg->ID_USER;
-				printf(
-						"Ya esta conectado con el servidor, su id de usuario es %d  \r\n",
-						msg->ID_USER);
+				printf("Ya esta conectado con el servidor, su id de usuario es %d  \r\n", msg->ID_USER);
 				if (msg->LEN != 0) {
 					printf("El Servidor Respondio --->   %s\n", msg->MSG);
 				}
@@ -106,19 +97,6 @@ void *checkConnections(void *data) {
 // MAIN
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
-
-	pathIW = malloc(strlen("./Debug") + 1);
-	strcpy(pathIW, "./Debug");
-
-	if (access(pathIW, F_OK) != -1) {
-		// file exists
-		pathIW = malloc(strlen("./..") + 1);
-		strcpy(pathIW, "./..");
-	} else {
-		// file doesn't exist
-		pathIW = malloc(strlen(".") + 1);
-		strcpy(pathIW, ".");
-	}
 
 	//Server Variables
 	int n, sdc, nro;
@@ -145,9 +123,7 @@ int main(int argc, char *argv[]) {
 	if (childPID >= 0) {	// fork was successful
 		if (childPID == 0) {	// Parent process- client
 			if (argc < 2) {
-				printf(
-						"Debe configurar el parametro correspondiente a la IP del servidor\n",
-						argv[0]);
+				printf("Debe configurar el parametro correspondiente a la IP del servidor\n", argv[0]);
 				exit(-1);
 			}
 
@@ -215,8 +191,7 @@ int main(int argc, char *argv[]) {
 
 			listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
-			printf("Socket retrieve success in %s:%d\n", CliServer.ip,
-					CliServer.puerto);
+			printf("Socket retrieve success in %s:%d\n", CliServer.ip, CliServer.puerto);
 
 			memset(&serv_addr, '0', sizeof(serv_addr));
 			memset(sendBuff, '0', sizeof(sendBuff));
@@ -242,8 +217,7 @@ int main(int argc, char *argv[]) {
 
 				if (FD_ISSET(listenfd, &copia2)) { // Recibe un cliente que se quiere conectar
 					lon = sizeof(cliente);
-					connfd = accept(listenfd, (struct sockaddr *) &cliente,
-							&lon);
+					connfd = accept(listenfd, (struct sockaddr *) &cliente, &lon);
 
 					FD_SET(connfd, &conjunto2);
 
@@ -279,16 +253,13 @@ int main(int argc, char *argv[]) {
 
 									}
 
-									char* folder =
-											(char *) malloc(
-													1 + strlen(pathIW)
-															+ strlen(
-																	"/IWTP-Client/Shared/"));
+								/*	char* folder = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/Shared/"));
 									strcat(folder, pathIW);
-									strcat(folder, "/IWTP-Client/Shared/");
+									strcat(folder, "/IWTP-Client/Shared/");*/
 
-									path = (char *) malloc(
-											1 + strlen(folder) + strlen(title));
+									char* folder = loadPath("/Shared/");
+
+									path = (char *) malloc(1 + strlen(folder) + strlen(title));
 									strcpy(path, folder);
 									strcat(path, title);
 
@@ -372,10 +343,8 @@ void loadConfiguration() {
 	size_t len = 0;
 	ssize_t read;
 
-	char* path = (char *) malloc(
-			1 + strlen(pathIW) + strlen("/IWTP-Client/config"));
-	strcat(path, pathIW);
-	strcat(path, "/IWTP-Client/config");
+
+	char* path = loadPath("/config");
 
 	fp = fopen(path, "r");
 

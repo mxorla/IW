@@ -189,11 +189,15 @@ void solicitarFile(int sd, struct protocolo_t *msg) {
 void *runRepro(void *data) {
 	char * name = (char *) data;
 	usleep(300);
-	char * folder = "mplayer -vfm ffmpeg /media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
 
-	char* command = (char *) malloc(1 + strlen(folder) + strlen(name));
-	strcpy(command, folder);
+    char* folder = loadPath("/Shared/Received/");
+	char* mplayer="mplayer -vfm ffmpeg ";
+
+	char* command = (char *) malloc(1 + strlen(mplayer) + strlen(folder) + strlen(name));
+	strcpy(command, mplayer);
+	strcat(command, folder);
 	strcat(command, name);
+
 
 	system(command);
 }
@@ -265,7 +269,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 				char title[50];
 				memcpy(title, bufferTitle + sizeof(char), longTitle + 2);
 
-				char* folder = "/media/joaquin/Data/FUCK-ULTAD/IW/workspace/iw/IWTP-Client/Shared/Recibidos/";
+				char* folder = loadPath("/Shared/Received/");
 				char* path = (char *) malloc(1 + strlen(folder) + strlen(title));
 				strcpy(path, folder);
 				strcat(path, title);
