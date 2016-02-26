@@ -96,7 +96,6 @@ int main(void) {
 						}
 						case 5: {
 							printf("Desconectar\n");
-							close(sdc);
 							//Dado socket (sdc) obtiene numero
 							nro = buscarPosicionUsuario(sdc);
 							//Lo marca como cerrado
@@ -105,9 +104,10 @@ int main(void) {
 							usersArray[nro].address.puerto = 0;
 
 							//Borra los contenidos
-							deleteContentArray(sdc);
+							deleteContentArray(sdc, msg);
 							//Borra descriptor del set
 							FD_CLR(sdc, &conjunto);
+							close(sdc);
 
 							printf("El usuario se desconecto\n");
 							break;
@@ -139,7 +139,7 @@ int main(void) {
 						usersArray[nro].address.puerto = 0;
 
 						//Borra los contenidos
-						deleteContentArray(sdc);
+						deleteContentArray(sdc, msg);
 						//Borra descriptor del set
 						FD_CLR(sdc, &conjunto);
 

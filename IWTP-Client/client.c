@@ -1,12 +1,11 @@
+#include <unistd.h>
 #include "commonDefs.h"
 #include "commonFunctions.h"
 #include "clientFunctions.h"
 #include <netdb.h>
 #include <pthread.h>
 #include <termios.h>
-#include <unistd.h>
 #include <ctype.h>
-#include <unistd.h>
 
 int sd;
 //int sd2;
@@ -81,6 +80,8 @@ void *checkConnections(void *data) {
 			}
 				break;
 			case 4: {
+				printf("Good bye......");
+				exit(0);
 			}
 				break;
 

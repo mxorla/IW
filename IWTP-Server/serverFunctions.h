@@ -7,9 +7,8 @@ void consultarContenido(int sd, struct protocolo_t *msg);
 void consultarInformacionContenido(int sd, struct protocolo_t *msg);
 int getPosContentArray();
 users_t getUserById(uint8_t userId);
-void guardarCliServer(struct sockaddr_in client, int socket,
-		struct protocolo_t *msg);
-void deleteContentArray(uint8_t id);
+void guardarCliServer(struct sockaddr_in client, int socket, struct protocolo_t *msg);
+void deleteContentArray(uint8_t id, struct protocolo_t *msg);
 
 //------------------------------------------------------------------------------
 // Si el usuario no esta en el array lo agrega.
@@ -28,8 +27,7 @@ void agregarUsuario(struct sockaddr_in client, int socket) {
 	//usersArray[userPos].address.puerto = ntohs(client.sin_port); es el puerto del clienteCliente no del clienteServidor
 }
 
-void guardarCliServer(struct sockaddr_in client, int socket,
-		struct protocolo_t *msg) {
+void guardarCliServer(struct sockaddr_in client, int socket, struct protocolo_t *msg) {
 	int userPos;
 
 	userPos = buscarPosicionUsuario(socket);
@@ -133,13 +131,17 @@ int getPosContentArray() {
 	return ret;
 }
 
-void deleteContentArray(uint8_t id) {
+void deleteContentArray(uint8_t id, struct protocolo_t *msg) {
 	int i, ret = -1;
 	for (i = 0; i < MAX_CONTENTS; i++) {
 		if (contentsArray[i].propietario.id == id) {
 			contentsArray[i].propietario.id = 0;
 		}
 	}
+	msg->LEN = 4;
+	msg->ID_USER = (uint8_t) id;
+	msg->TYPE = 4;
+	writeMsg(id, msg);
 }
 
 void consultarContenido(int sd, struct protocolo_t *msg) {
