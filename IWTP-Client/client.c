@@ -174,8 +174,6 @@ int main(int argc, char *argv[]) {
 				int opcion;
 				scanf("%d", &opcion); //Leyendo opcion
 
-				//system("clear");
-
 				switch (opcion) {
 				case 1: {
 					publicarContenido(sd, userIdAssigned, msg);
@@ -437,7 +435,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 	bufferTitle[longTitle + 1] = '\0';
 
 	int ok = 1;
-	while (1) {
+	while (ok) {
 //		if (readMsg(sockfd, msg) > 0 || (bytesReceived = read(sockfd, recvBuff, 256)) > 0) {
 		if (readMsg(sockfd, msg) > 0) {
 			if (msg->TYPE == 98) {
@@ -508,7 +506,7 @@ void iniciarStreaming(content_t de, struct protocolo_t *msg) {
 		//close(sockfd);
 	}
 
-	exit(0);
+	//exit(0);
 }
 
 void loadConfiguration() {
