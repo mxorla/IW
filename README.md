@@ -1,11 +1,10 @@
 
-#Streaming de Video (Red P2P centralizada) 
+#UTN-FRLP Internetworking
+##Streaming de Video (Red P2P centralizada) 
 
-##UTN-FRLP Internetworking
+**Abstract.** En el presente trabajo se desarrolla una aplicación de streaming de video, compuesta por un cliente y un servidor programados en lenguaje C destinados a ser utilizados en plataformas UNIX, basado en las librerías BSD Sockets.
 
-Ing. en Sistemas de Información
-
-Universidad Tecnológica Nacional
+**Keywords.** Redes, Internetworking, Streaming, Video, Universidad Tecnológica Nacional, BSD Socket, UNIX.
 
 ##Developers
 > Larrañaga Joaquín
@@ -16,7 +15,3 @@ Universidad Tecnológica Nacional
 
 ##Profesor
 > Agustin Eijo
-
-**Abstract.** En el presente trabajo se desarrolla una aplicación de streaming de video, compuesta por un cliente y un servidor programados en lenguaje C destinados a ser utilizados en plataformas UNIX, basado en las librerías BSD Sockets.
-
-**Keywords.** Redes, Internetworking, Streaming, Video, Universidad Tecnológica Nacional, BSD Socket, UNIX.
