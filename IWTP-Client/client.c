@@ -20,11 +20,12 @@ void printMenu() {
 	printf("Menu\n");
 
 	printf("1 -		Publicar Contenido\n");
-	printf("2 -		Consultar Contenido\n");
-	printf("3 -		Consultar Informacion Contenido\n");
+	printf("2 -		Consultar contenidos compartidos\n");
+	printf("3 -		Iniciar streaming de contenido\n");
 	printf("4 -		Desconectar\n");
 
-	printf("---------------------------------------------------------------------- \r\n");
+	printf(
+			"---------------------------------------------------------------------- \r\n");
 }
 
 //------------------------------------------------------------------------------
@@ -41,13 +42,16 @@ void *checkConnections(void *data) {
 			case 1: {
 				//printMenu();
 				int j, cant, act = 1;
-				printf("	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
-				printf("---------------------------------------------------------------------- \r\n");
+				printf(
+						"	ID     |     Titulo     |     Autor     |     Descripcion \r\n");
+				printf(
+						"---------------------------------------------------------------------- \r\n");
 				cant = msg->MSG[0];
 				for (j = 0; j < cant; j++) {
 					de = BytesToData(&act, msg);
 
-					printf("%d			%s           %s        %s", de.id_content, de.det.title, de.det.aut, de.det.desc);
+					printf("%d		 %s              %s              %s", de.id_content,
+							de.det.title, de.det.aut, de.det.desc);
 					printf("\r\n");
 
 				}
@@ -59,12 +63,9 @@ void *checkConnections(void *data) {
 				break;
 			case 3: {
 				printMenu();
-				printf("Datos del contenido \r\n");
-				printf("	 Titulo     |        Propietario IP:PUERTO \r\n");
-				printf("---------------------------------------------------------------------- \r\n");
-
 				de = BytesToDataIp(msg);
-				printf("     %s                  %s:%d", de.det.title, de.propietario.ip, de.propietario.puerto);
+				printf("     %s                  %s:%d", de.det.title,
+						de.propietario.ip, de.propietario.puerto);
 				printf("> \r");
 
 				iniciarStreaming(de, msg);
@@ -80,7 +81,9 @@ void *checkConnections(void *data) {
 
 			case 99: {
 				userIdAssigned = msg->ID_USER;
-				printf("Ya esta conectado con el servidor, su id de usuario es %d  \r\n", msg->ID_USER);
+				printf(
+						"Ya esta conectado con el servidor, su id de usuario es %d  \r\n",
+						msg->ID_USER);
 				if (msg->LEN != 0) {
 					printf("El Servidor Respondio --->   %s\n", msg->MSG);
 				}
@@ -107,7 +110,7 @@ int main(int argc, char *argv[]) {
 	pathIW = malloc(strlen("./Debug") + 1);
 	strcpy(pathIW, "./Debug");
 
-	if( access( pathIW, F_OK ) != -1 ) {
+	if (access(pathIW, F_OK) != -1) {
 		// file exists
 		pathIW = malloc(strlen("./..") + 1);
 		strcpy(pathIW, "./..");
@@ -142,7 +145,9 @@ int main(int argc, char *argv[]) {
 	if (childPID >= 0) {	// fork was successful
 		if (childPID == 0) {	// Parent process- client
 			if (argc < 2) {
-				printf("Debe configurar el parametro correspondiente a la IP del servidor\n", argv[0]);
+				printf(
+						"Debe configurar el parametro correspondiente a la IP del servidor\n",
+						argv[0]);
 				exit(-1);
 			}
 
@@ -156,7 +161,7 @@ int main(int argc, char *argv[]) {
 
 			lon = sizeof(servidor);
 			if (connect(sd, (struct sockaddr *) &servidor, lon) < 0) {
-				perror("Error en connect");
+				perror("Error en coneccion");
 				exit(-1);
 			}
 
@@ -182,7 +187,7 @@ int main(int argc, char *argv[]) {
 				}
 				case 3: {
 					uint8_t id;
-					printf("Ingrese id que desea obtener info\r\n");
+					printf("Ingrese id del contenido para iniciar el streaming\r\n");
 					scanf("%d", &id);
 					consultarInformacionContenido(sd, id, userIdAssigned, msg);
 					printf("> \r");
@@ -210,7 +215,8 @@ int main(int argc, char *argv[]) {
 
 			listenfd = socket(AF_INET, SOCK_STREAM, 0);
 
-			printf("Socket retrieve success in %s:%d\n", CliServer.ip, CliServer.puerto);
+			printf("Socket retrieve success in %s:%d\n", CliServer.ip,
+					CliServer.puerto);
 
 			memset(&serv_addr, '0', sizeof(serv_addr));
 			memset(sendBuff, '0', sizeof(sendBuff));
@@ -236,7 +242,8 @@ int main(int argc, char *argv[]) {
 
 				if (FD_ISSET(listenfd, &copia2)) { // Recibe un cliente que se quiere conectar
 					lon = sizeof(cliente);
-					connfd = accept(listenfd, (struct sockaddr *) &cliente, &lon);
+					connfd = accept(listenfd, (struct sockaddr *) &cliente,
+							&lon);
 
 					FD_SET(connfd, &conjunto2);
 
@@ -272,12 +279,16 @@ int main(int argc, char *argv[]) {
 
 									}
 
-									char* folder = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/Shared/"));
+									char* folder =
+											(char *) malloc(
+													1 + strlen(pathIW)
+															+ strlen(
+																	"/IWTP-Client/Shared/"));
 									strcat(folder, pathIW);
 									strcat(folder, "/IWTP-Client/Shared/");
 
-
-									path = (char *) malloc(1 + strlen(folder) + strlen(title));
+									path = (char *) malloc(
+											1 + strlen(folder) + strlen(title));
 									strcpy(path, folder);
 									strcat(path, title);
 
@@ -361,11 +372,12 @@ void loadConfiguration() {
 	size_t len = 0;
 	ssize_t read;
 
-	char* path = (char *) malloc(1 + strlen(pathIW) + strlen("/IWTP-Client/config"));
+	char* path = (char *) malloc(
+			1 + strlen(pathIW) + strlen("/IWTP-Client/config"));
 	strcat(path, pathIW);
 	strcat(path, "/IWTP-Client/config");
 
-	fp = fopen(path,"r");
+	fp = fopen(path, "r");
 
 	while ((read = getline(&line, &len, fp)) != -1) {
 
